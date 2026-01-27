@@ -3,251 +3,1326 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dobble Vitrasa</title>
+  <title>Cortex Vitrasa</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/_sdk/element_sdk.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&amp;display=swap" rel="stylesheet">
+  <script src="/_sdk/data_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
   <style>
     body {
       box-sizing: border-box;
     }
     * {
-      font-family: 'Nunito', sans-serif;
+      font-family: 'Outfit', sans-serif;
     }
-    .card-container {
-      perspective: 1000px;
+    .bus-pattern {
+      background-image: 
+        radial-gradient(circle at 20% 80%, rgba(255,193,7,0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(0,150,136,0.1) 0%, transparent 50%),
+        linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
     }
-    .card {
-      transition: transform 0.6s, box-shadow 0.3s;
-      transform-style: preserve-3d;
+    .card-glow {
+      box-shadow: 0 0 30px rgba(255,193,7,0.2), 0 10px 40px rgba(0,0,0,0.3);
     }
-    .card:hover {
-      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    .btn-primary {
+      background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+      transition: all 0.3s ease;
     }
-    .symbol {
-      transition: all 0.2s ease;
-      cursor: pointer;
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(255,193,7,0.4);
     }
-    .symbol:hover {
-      transform: scale(1.15);
-      filter: brightness(1.1);
+    .btn-secondary {
+      background: linear-gradient(135deg, #009688 0%, #00796b 100%);
+      transition: all 0.3s ease;
     }
-    .symbol.correct {
-      animation: pulse-correct 0.5s ease;
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0,150,136,0.4);
     }
-    .symbol.wrong {
+    .bus-card {
+      background: linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%);
+      border-left: 5px solid #ffc107;
+      transition: all 0.3s ease;
+    }
+    .bus-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .bus-card.selected {
+      border-left-color: #009688;
+      background: linear-gradient(145deg, #e0f2f1 0%, #b2dfdb 100%);
+    }
+    .bus-card.correct {
+      border-left-color: #4caf50;
+      background: linear-gradient(145deg, #c8e6c9 0%, #a5d6a7 100%);
+      animation: pulse-green 0.5s ease;
+    }
+    .bus-card.incorrect {
+      border-left-color: #f44336;
+      background: linear-gradient(145deg, #ffcdd2 0%, #ef9a9a 100%);
       animation: shake 0.5s ease;
     }
-    @keyframes pulse-correct {
+    @keyframes pulse-green {
       0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.3); }
+      50% { transform: scale(1.05); }
     }
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
       25% { transform: translateX(-10px); }
       75% { transform: translateX(10px); }
     }
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    .floating {
-      animation: float 3s ease-in-out infinite;
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
     }
-    @keyframes confetti-fall {
-      0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(100%) rotate(720deg); opacity: 0; }
+    .timer-bar {
+      transition: width 0.1s linear;
     }
-    .confetti {
+    .memory-card {
+      perspective: 1000px;
+      cursor: pointer;
+    }
+    .memory-card-inner {
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+    .memory-card.flipped .memory-card-inner {
+      transform: rotateY(180deg);
+    }
+    .memory-card-front, .memory-card-back {
+      backface-visibility: hidden;
       position: absolute;
-      width: 10px;
-      height: 10px;
-      animation: confetti-fall 1s ease-out forwards;
+      width: 100%;
+      height: 100%;
+      border-radius: 12px;
+    }
+    .memory-card-back {
+      transform: rotateY(180deg);
+    }
+    .route-line {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      animation: drawLine 2s ease forwards;
+    }
+    @keyframes drawLine {
+      to { stroke-dashoffset: 0; }
+    }
+    .leaderboard-row {
+      animation: slideIn 0.3s ease forwards;
+      opacity: 0;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .challenge-icon {
+      transition: all 0.3s ease;
+    }
+    .challenge-icon:hover {
+      transform: scale(1.1) rotate(5deg);
+    }
+    .streak-fire {
+      animation: fireGlow 0.5s ease infinite alternate;
+    }
+    @keyframes fireGlow {
+      from { text-shadow: 0 0 10px #ff9800, 0 0 20px #ff5722; }
+      to { text-shadow: 0 0 20px #ff9800, 0 0 40px #ff5722; }
     }
   </style>
   <style>@view-transition { navigation: auto; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
- <body class="h-full overflow-auto">
-  <div id="app" class="min-h-full w-full flex flex-col items-center justify-center p-4" style="background: linear-gradient(135deg, #1a5f2a 0%, #2d8a3e 50%, #1a5f2a 100%);"><!-- Header -->
-   <div class="text-center mb-6">
-    <h1 id="game-title" class="text-4xl md:text-5xl font-black text-white drop-shadow-lg mb-2">🚍 Dobble Vitrasa 🚍</h1>
-    <p id="instruction-text" class="text-xl text-green-100 font-bold">¡Encuentra el símbolo común entre las dos cartas!</p>
-   </div><!-- Score and Timer -->
-   <div class="flex gap-6 mb-6">
-    <div class="bg-white/20 backdrop-blur-sm rounded-2xl px-6 py-3 text-center">
-     <p class="text-green-100 text-sm font-bold">PUNTOS</p>
-     <p id="score" class="text-3xl font-black text-white">0</p>
-    </div>
-    <div class="bg-white/20 backdrop-blur-sm rounded-2xl px-6 py-3 text-center">
-     <p class="text-green-100 text-sm font-bold">TIEMPO</p>
-     <p id="timer" class="text-3xl font-black text-white">60</p>
-    </div>
-    <div class="bg-white/20 backdrop-blur-sm rounded-2xl px-6 py-3 text-center">
-     <p class="text-green-100 text-sm font-bold">RACHA</p>
-     <p id="streak" class="text-3xl font-black text-yellow-300">0</p>
-    </div>
-   </div><!-- Game Area -->
-   <div id="game-area" class="flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-center"><!-- Card 1 -->
-    <div class="card-container">
-     <div id="card1" class="card w-64 h-64 md:w-72 md:h-72 bg-white rounded-full shadow-2xl flex items-center justify-center relative border-8 border-green-600 floating" style="animation-delay: 0s;"><!-- Symbols will be inserted here -->
+ <body class="h-full bus-pattern text-white overflow-auto">
+  <div id="app" class="h-full w-full p-4 md:p-6"><!-- Pantalla de Inicio -->
+   <div id="screen-home" class="max-w-4xl mx-auto">
+    <header class="text-center mb-8 fade-in">
+     <div class="inline-block mb-4">
+      <svg width="80" height="80" viewbox="0 0 80 80" class="mx-auto"><rect x="10" y="20" width="60" height="40" rx="8" fill="#ffc107" /> <rect x="15" y="25" width="20" height="15" rx="3" fill="#1a1a2e" /> <rect x="45" y="25" width="20" height="15" rx="3" fill="#1a1a2e" /> <circle cx="25" cy="60" r="8" fill="#333" /> <circle cx="25" cy="60" r="4" fill="#666" /> <circle cx="55" cy="60" r="8" fill="#333" /> <circle cx="55" cy="60" r="4" fill="#666" /> <rect x="5" y="35" width="8" height="3" rx="1" fill="#009688" /> <rect x="67" y="35" width="8" height="3" rx="1" fill="#f44336" /> <text x="40" y="48" text-anchor="middle" fill="#1a1a2e" font-size="10" font-weight="bold">
+        VITRASA
+       </text>
+      </svg>
      </div>
-    </div><!-- VS Badge -->
-    <div class="bg-yellow-400 text-green-800 font-black text-2xl px-4 py-2 rounded-full shadow-lg transform rotate-12">
-     VS
-    </div><!-- Card 2 -->
-    <div class="card-container">
-     <div id="card2" class="card w-64 h-64 md:w-72 md:h-72 bg-white rounded-full shadow-2xl flex items-center justify-center relative border-8 border-green-600 floating" style="animation-delay: 0.5s;"><!-- Symbols will be inserted here -->
+     <h1 id="main-title" class="text-4xl md:text-5xl font-extrabold mb-2 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">Cortex Vitrasa</h1>
+     <p id="welcome-text" class="text-lg text-gray-300">¡Pon a prueba tu mente con los buses de Vigo!</p>
+    </header><!-- Stats del jugador -->
+    <div id="player-stats" class="bg-white/10 backdrop-blur rounded-2xl p-4 mb-6 fade-in" style="animation-delay: 0.1s">
+     <div class="flex items-center justify-between flex-wrap gap-4">
+      <div class="flex items-center gap-3">
+       <div class="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-2xl">
+        🧠
+       </div>
+       <div>
+        <p class="text-sm text-gray-400">Jugador</p>
+        <p id="player-name-display" class="font-bold text-lg">Anónimo</p>
+       </div>
+      </div>
+      <div class="flex gap-6 text-center">
+       <div>
+        <p class="text-2xl font-bold text-yellow-400" id="stat-score">0</p>
+        <p class="text-xs text-gray-400">Puntos</p>
+       </div>
+       <div>
+        <p class="text-2xl font-bold text-teal-400" id="stat-games">0</p>
+        <p class="text-xs text-gray-400">Partidas</p>
+       </div>
+       <div>
+        <p class="text-2xl font-bold text-orange-400" id="stat-streak">0</p>
+        <p class="text-xs text-gray-400">Mejor Racha</p>
+       </div>
+      </div>
+     </div>
+    </div><!-- Registro de nombre -->
+    <div id="name-input-section" class="bg-white/10 backdrop-blur rounded-2xl p-4 mb-6 fade-in" style="animation-delay: 0.15s"><label for="player-name-input" class="block text-sm text-gray-300 mb-2">Tu nombre para el ranking:</label>
+     <div class="flex gap-2"><input type="text" id="player-name-input" placeholder="Escribe tu nombre..." class="flex-1 px-4 py-2 rounded-xl bg-white/20 border border-white/30 text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400"> <button id="save-name-btn" class="btn-secondary px-4 py-2 rounded-xl font-semibold text-white"> Guardar </button>
+     </div>
+    </div><!-- Modos de juego -->
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6"><button onclick="startChallenge('memory')" class="challenge-icon bg-white/10 backdrop-blur rounded-2xl p-4 text-center hover:bg-white/20 fade-in" style="animation-delay: 0.2s">
+      <div class="text-4xl mb-2">
+       ����
+      </div><h3 class="font-bold text-sm">Memoria</h3><p class="text-xs text-gray-400">Recuerda las rutas</p></button> <button onclick="startChallenge('calculation')" class="challenge-icon bg-white/10 backdrop-blur rounded-2xl p-4 text-center hover:bg-white/20 fade-in" style="animation-delay: 0.25s">
+      <div class="text-4xl mb-2">
+       🔢
+      </div><h3 class="font-bold text-sm">Cálculo</h3><p class="text-xs text-gray-400">Billetes y cambio</p></button> <button onclick="startChallenge('routes')" class="challenge-icon bg-white/10 backdrop-blur rounded-2xl p-4 text-center hover:bg-white/20 fade-in" style="animation-delay: 0.3s">
+      <div class="text-4xl mb-2">
+       🗺️
+      </div><h3 class="font-bold text-sm">Rutas</h3><p class="text-xs text-gray-400">¿Qué línea va?</p></button> <button onclick="startChallenge('sequence')" class="challenge-icon bg-white/10 backdrop-blur rounded-2xl p-4 text-center hover:bg-white/20 fade-in" style="animation-delay: 0.35s">
+      <div class="text-4xl mb-2">
+       🔄
+      </div><h3 class="font-bold text-sm">Secuencia</h3><p class="text-xs text-gray-400">Orden de paradas</p></button> <button onclick="startChallenge('speed')" class="challenge-icon bg-white/10 backdrop-blur rounded-2xl p-4 text-center hover:bg-white/20 fade-in" style="animation-delay: 0.4s">
+      <div class="text-4xl mb-2">
+       ⚡
+      </div><h3 class="font-bold text-sm">Velocidad</h3><p class="text-xs text-gray-400">Respuesta rápida</p></button> <button onclick="startChallenge('pairs')" class="challenge-icon bg-white/10 backdrop-blur rounded-2xl p-4 text-center hover:bg-white/20 fade-in" style="animation-delay: 0.45s">
+      <div class="text-4xl mb-2">
+       👯
+      </div><h3 class="font-bold text-sm">Parejas</h3><p class="text-xs text-gray-400">Une línea y destino</p></button>
+    </div><!-- Botón de juego mixto --> <button onclick="startMixedGame()" class="w-full btn-primary py-4 rounded-2xl font-bold text-xl text-gray-900 mb-6 fade-in" style="animation-delay: 0.5s"> 🎮 JUEGO MIXTO - 10 Rondas </button> <!-- Leaderboard -->
+    <div class="bg-white/10 backdrop-blur rounded-2xl p-4 fade-in" style="animation-delay: 0.55s">
+     <h2 class="text-xl font-bold mb-4 flex items-center gap-2">🏆 Ranking de Viajeros</h2>
+     <div id="leaderboard" class="space-y-2">
+      <p class="text-gray-400 text-center py-4">Cargando ranking...</p>
      </div>
     </div>
-   </div><!-- Feedback -->
-   <div id="feedback" class="mt-6 h-12 flex items-center justify-center">
-    <p id="feedback-text" class="text-2xl font-black text-white drop-shadow-lg"></p>
-   </div><!-- Start/Restart Button --> <button id="start-btn" class="mt-4 bg-yellow-400 hover:bg-yellow-300 text-green-800 font-black text-xl px-8 py-4 rounded-full shadow-lg transform transition hover:scale-105 active:scale-95"> 🎮 ¡EMPEZAR! </button> <!-- Game Over Modal -->
-   <div id="game-over" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-3xl p-8 text-center max-w-md w-full shadow-2xl">
-     <h2 class="text-4xl font-black text-green-600 mb-4">🎉 ¡Fin del juego!</h2>
-     <div class="bg-green-100 rounded-2xl p-6 mb-6">
-      <p class="text-green-600 font-bold text-lg">Puntuación final</p>
-      <p id="final-score" class="text-6xl font-black text-green-700">0</p>
+   </div><!-- Pantalla de Juego -->
+   <div id="screen-game" class="max-w-4xl mx-auto hidden"><!-- Header del juego -->
+    <div class="flex items-center justify-between mb-4"><button onclick="exitGame()" class="flex items-center gap-2 text-gray-400 hover:text-white transition">
+      <svg width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7" />
+      </svg> Salir </button>
+     <div class="flex items-center gap-4">
+      <div class="flex items-center gap-1"><span id="current-streak" class="text-2xl font-bold text-orange-400">0</span> <span class="text-xl">🔥</span>
+      </div>
+      <div class="bg-white/20 rounded-full px-4 py-1"><span class="text-sm text-gray-300">Ronda</span> <span id="round-display" class="font-bold ml-1">1/10</span>
+      </div>
      </div>
-     <p id="final-message" class="text-gray-600 text-lg mb-6">¡Buen viaje con Vitrasa!</p><button id="restart-btn" class="bg-green-600 hover:bg-green-500 text-white font-black text-xl px-8 py-4 rounded-full shadow-lg transform transition hover:scale-105"> 🔄 Jugar de nuevo </button>
+     <div class="text-right">
+      <p class="text-2xl font-bold text-yellow-400" id="game-score">0</p>
+      <p class="text-xs text-gray-400">puntos</p>
+     </div>
+    </div><!-- Barra de tiempo -->
+    <div class="w-full h-2 bg-white/20 rounded-full mb-6 overflow-hidden">
+     <div id="timer-bar" class="timer-bar h-full bg-gradient-to-r from-green-400 via-yellow-400 to-red-500 rounded-full" style="width: 100%"></div>
+    </div><!-- Área del desafío -->
+    <div id="challenge-area" class="bg-white/10 backdrop-blur rounded-2xl p-6 min-h-[400px]"><!-- El contenido del desafío se genera dinámicamente -->
     </div>
-   </div><!-- Confetti Container -->
-   <div id="confetti-container" class="fixed inset-0 pointer-events-none overflow-hidden z-40"></div>
+   </div><!-- Pantalla de Resultados -->
+   <div id="screen-results" class="max-w-4xl mx-auto hidden">
+    <div class="text-center py-8 fade-in">
+     <div class="text-6xl mb-4">
+      🎉
+     </div>
+     <h2 class="text-3xl font-bold mb-2">¡Partida Terminada!</h2>
+     <p class="text-gray-300 mb-6">Has completado todos los desafíos</p>
+     <div class="bg-white/10 backdrop-blur rounded-2xl p-6 mb-6">
+      <div class="grid grid-cols-3 gap-4 mb-6">
+       <div class="text-center">
+        <p class="text-4xl font-bold text-yellow-400" id="result-score">0</p>
+        <p class="text-sm text-gray-400">Puntos</p>
+       </div>
+       <div class="text-center">
+        <p class="text-4xl font-bold text-green-400" id="result-correct">0</p>
+        <p class="text-sm text-gray-400">Aciertos</p>
+       </div>
+       <div class="text-center">
+        <p class="text-4xl font-bold text-orange-400" id="result-streak">0</p>
+        <p class="text-sm text-gray-400">Mejor Racha</p>
+       </div>
+      </div>
+      <div id="result-message" class="text-lg font-semibold text-teal-400 mb-4">
+       ¡Buen trabajo!
+      </div>
+     </div>
+     <div class="flex gap-4 justify-center"><button onclick="startMixedGame()" class="btn-primary px-8 py-3 rounded-xl font-bold text-gray-900"> 🔄 Jugar de Nuevo </button> <button onclick="showHome()" class="btn-secondary px-8 py-3 rounded-xl font-bold text-white"> �� Inicio </button>
+     </div>
+    </div>
+   </div>
   </div>
   <script>
-    // Vitrasa themed symbols as SVG
-    const vitrasaSymbols = [
-      { id: 'bus', name: 'Autobús', svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><rect x="8" y="16" width="48" height="32" rx="4" fill="#2d8a3e"/><rect x="12" y="20" width="12" height="10" rx="2" fill="#87CEEB"/><rect x="28" y="20" width="12" height="10" rx="2" fill="#87CEEB"/><rect x="44" y="20" width="8" height="10" rx="2" fill="#87CEEB"/><circle cx="18" cy="48" r="5" fill="#333"/><circle cx="46" cy="48" r="5" fill="#333"/><rect x="4" y="24" width="4" height="8" rx="1" fill="#FFD700"/><rect x="56" y="24" width="4" height="8" rx="1" fill="#FF4444"/></svg>` },
-      { id: 'ticket', name: 'Billete', svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><rect x="8" y="18" width="48" height="28" rx="4" fill="#FFD700"/><rect x="8" y="28" width="48" height="2" fill="#FFA500" stroke-dasharray="4"/><text x="32" y="24" text-anchor="middle" font-size="8" font-weight="bold" fill="#2d8a3e">VITRASA</text><text x="32" y="40" text-anchor="middle" font-size="6" fill="#666">BILLETE</text><circle cx="12" cy="32" r="4" fill="white"/><circle cx="52" cy="32" r="4" fill="white"/></svg>` },
-      { id: 'stop', name: 'Parada', svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><rect x="28" y="20" width="8" height="36" fill="#666"/><rect x="20" y="12" width="24" height="20" rx="3" fill="#2d8a3e"/><text x="32" y="26" text-anchor="middle" font-size="8" font-weight="bold" fill="white">BUS</text><rect x="24" y="56" width="16" height="4" rx="2" fill="#888"/></svg>` },
-      { id: 'driver', name: 'Conductor', svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><circle cx="32" cy="20" r="12" fill="#FFE4C4"/><ellipse cx="32" cy="48" rx="16" ry="12" fill="#2d8a3e"/><rect x="24" y="8" width="16" height="8" rx="2" fill="#1a5f2a"/><circle cx="28" cy="18" r="2" fill="#333"/><circle cx="36" cy="18" r="2" fill="#333"/><path d="M28 24 Q32 28 36 24" stroke="#333" stroke-width="2" fill="none"/></svg>` },
-      { id: 'card', name: 'Tarjeta', svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><rect x="10" y="18" width="44" height="28" rx="4" fill="#4169E1"/><rect x="14" y="34" width="20" height="4" rx="1" fill="#FFD700"/><rect x="14" y="40" width="12" height="2" rx="1" fill="white" opacity="0.7"/><circle cx="44" cy="28" r="6" fill="#FFD700"/><text x="44" y="31" text-anchor="middle" font-size="8" font-weight="bold" fill="#4169E1">V</text></svg>` },
-      { id: 'wheel', name: 'Rueda', svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><circle cx="32" cy="32" r="24" fill="#333"/><circle cx="32" cy="32" r="18" fill="#666"/><circle cx="32" cy="32" r="8" fill="#888"/><circle cx="32" cy="32" r="4" fill="#333"/><rect x="30" y="8" width="4" height="12" fill="#888"/><rect x="30" y="44" width="4" height="12" fill="#888"/><rect x="8" y="30" width="12" height="4" fill="#888"/><rect x="44" y="30" width="12" height="4" fill="#888"/></svg>` },
-      { id: 'clock', name: 'Horario', svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><circle cx="32" cy="32" r="24" fill="white" stroke="#2d8a3e" stroke-width="4"/><line x1="32" y1="32" x2="32" y2="18" stroke="#2d8a3e" stroke-width="3" stroke-linecap="round"/><line x1="32" y1="32" x2="42" y2="32" stroke="#2d8a3e" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="32" r="3" fill="#2d8a3e"/></svg>` },
-      { id: 'map', name: 'Mapa', svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><rect x="10" y="12" width="44" height="40" rx="2" fill="#F5F5DC"/><path d="M18 16 L18 44 L30 36 L30 16 Z" fill="#2d8a3e" opacity="0.5"/><path d="M30 16 L30 36 L46 44 L46 16 Z" fill="#4169E1" opacity="0.5"/><circle cx="38" cy="28" r="4" fill="#FF4444"/><path d="M38 24 L38 20" stroke="#FF4444" stroke-width="2"/></svg>` },
-      { id: 'euro', name: 'Euro', svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><circle cx="32" cy="32" r="22" fill="#FFD700"/><text x="32" y="42" text-anchor="middle" font-size="28" font-weight="bold" fill="#2d8a3e">€</text></svg>` },
-      { id: 'phone', name: 'App', svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><rect x="18" y="8" width="28" height="48" rx="4" fill="#333"/><rect x="22" y="14" width="20" height="32" rx="2" fill="#2d8a3e"/><circle cx="32" cy="52" r="3" fill="#666"/><text x="32" y="34" text-anchor="middle" font-size="10" font-weight="bold" fill="white">APP</text></svg>` },
-      { id: 'bell', name: 'Timbre', svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><path d="M32 8 L32 14" stroke="#FFD700" stroke-width="3"/><path d="M20 28 C20 18 26 14 32 14 C38 14 44 18 44 28 L44 40 L20 40 Z" fill="#FFD700"/><rect x="16" y="40" width="32" height="6" rx="2" fill="#FFD700"/><ellipse cx="32" cy="50" rx="6" ry="4" fill="#FFD700"/></svg>` },
-      { id: 'seat', name: 'Asiento', svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><rect x="18" y="24" width="28" height="24" rx="4" fill="#4169E1"/><rect x="20" y="12" width="24" height="16" rx="4" fill="#4169E1"/><rect x="16" y="48" width="6" height="8" rx="2" fill="#333"/><rect x="42" y="48" width="6" height="8" rx="2" fill="#333"/></svg>` },
-      { id: 'bridge', name: 'Puente', svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><path d="M4 48 L16 28 L32 20 L48 28 L60 48" stroke="#666" stroke-width="4" fill="none"/><line x1="16" y1="28" x2="16" y2="48" stroke="#666" stroke-width="3"/><line x1="32" y1="20" x2="32" y2="48" stroke="#666" stroke-width="3"/><line x1="48" y1="28" x2="48" y2="48" stroke="#666" stroke-width="3"/><rect x="0" y="48" width="64" height="4" fill="#666"/></svg>` },
-      { id: 'vigo', name: 'Vigo', svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><circle cx="32" cy="32" r="24" fill="#1a5f2a"/><text x="32" y="28" text-anchor="middle" font-size="10" font-weight="bold" fill="white">VIGO</text><text x="32" y="42" text-anchor="middle" font-size="8" fill="#FFD700">⭐⭐⭐</text></svg>` },
-      { id: 'tree', name: 'Castrelos', svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><rect x="28" y="40" width="8" height="16" fill="#8B4513"/><path d="M32 8 L48 40 L16 40 Z" fill="#2d8a3e"/><circle cx="24" cy="28" r="3" fill="#FF6B6B"/><circle cx="38" cy="32" r="2" fill="#FFD700"/></svg>` },
-      { id: 'beach', name: 'Playa', svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><rect x="0" y="40" width="64" height="24" fill="#F4D03F"/><rect x="0" y="32" width="64" height="12" fill="#3498DB"/><circle cx="50" cy="16" r="10" fill="#FFD700"/><path d="M8 56 L16 32 L24 56" stroke="#8B4513" stroke-width="3" fill="none"/><path d="M8 40 Q16 36 24 40" stroke="#E74C3C" stroke-width="2" fill="none"/></svg>` },
-      { id: 'fish', name: 'Pescado', svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><ellipse cx="28" cy="32" rx="20" ry="12" fill="#3498DB"/><path d="M48 32 L60 20 L60 44 Z" fill="#3498DB"/><circle cx="18" cy="30" r="3" fill="white"/><circle cx="18" cy="30" r="1.5" fill="#333"/><path d="M24 36 Q32 40 40 36" stroke="#1a5f2a" stroke-width="2" fill="none"/></svg>` },
-      { id: 'lighthouse', name: 'Faro', svg: `<svg viewBox="0 0 64 64" class="w-full h-full"><rect x="24" y="24" width="16" height="32" fill="#E74C3C"/><rect x="24" y="32" width="16" height="4" fill="white"/><rect x="24" y="44" width="16" height="4" fill="white"/><rect x="20" y="20" width="24" height="8" fill="#F5F5DC"/><polygon points="32,8 40,20 24,20" fill="#FFD700"/><line x1="32" y1="8" x2="12" y2="4" stroke="#FFD700" stroke-width="2"/><line x1="32" y1="8" x2="52" y2="4" stroke="#FFD700" stroke-width="2"/></svg>` }
-    ];
-
-    // Game state
-    let score = 0;
-    let timeLeft = 60;
-    let streak = 0;
-    let gameRunning = false;
-    let timerInterval = null;
-    let currentMatch = null;
-    let config = {};
-
+    // ==================== CONFIGURACIÓN ====================
     const defaultConfig = {
-      game_title: '🚍 Dobble Vitrasa 🚍',
-      instruction_text: '¡Encuentra el símbolo común entre las dos cartas!',
-      background_color: '#1a5f2a',
-      card_border_color: '#2d8a3e',
+      game_title: 'Cortex Vitrasa',
+      welcome_message: '¡Pon a prueba tu mente con los buses de Vigo!',
+      primary_color: '#1a1a2e',
+      secondary_color: '#ffc107',
       text_color: '#ffffff',
-      accent_color: '#FFD700',
-      button_color: '#FFD700',
-      font_family: 'Nunito'
+      accent_color: '#009688',
+      surface_color: '#16213e'
     };
 
-    // Initialize Element SDK
-    window.elementSdk.init({
-      defaultConfig,
-      onConfigChange: async (newConfig) => {
-        config = newConfig;
-        applyConfig();
-      },
-      mapToCapabilities: (cfg) => ({
-        recolorables: [
-          {
-            get: () => cfg.background_color || defaultConfig.background_color,
-            set: (value) => window.elementSdk.setConfig({ background_color: value })
+    let config = { ...defaultConfig };
+    let allScores = [];
+    let currentPlayer = null;
+
+    // ==================== DATOS DE VITRASA 2025 ====================
+    const vitrasaData = {
+      lines: [
+        { number: 'C1', name: 'Circular Centro', color: '#e53935', 
+          destinations: ['Policarpo Sanz', 'Urzáiz', 'Gran Vía', 'Praza de España', 'Torrecedeira', 'Berbés'] },
+        { number: 'C3d', name: 'Bouzas/Coia - Encarnación', color: '#1e88e5', 
+          destinations: ['Bouzas', 'Coia', 'Encarnación', 'Urzáiz', 'Gran Vía'] },
+        { number: 'C3i', name: 'Bouzas/Coia - Encarnación', color: '#00acc1', 
+          destinations: ['Bouzas', 'Coia', 'Encarnación', 'Urzáiz'] },
+        { number: '4A', name: 'Aragón - Coia', color: '#43a047', 
+          destinations: ['Aragón', 'Coia', 'Urzáiz', 'Praza de España'] },
+        { number: '4C', name: 'Gonzalo Espino - Coia', color: '#fb8c00', 
+          destinations: ['G. Espino', 'Coia', 'Camelias', 'Urzáiz'] },
+        { number: '5A', name: 'Navia - Trav. Vigo', color: '#8e24aa', 
+          destinations: ['Navia', 'Teis', 'Urzáiz', 'Praza de España'] },
+        { number: '5B', name: 'Navia - S. Badía', color: '#d81b60', 
+          destinations: ['Navia', 'S. Badía', 'Teis', 'Urzáiz'] },
+        { number: '6', name: 'Hospital - Beade - Praza España', color: '#5e35b1', 
+          destinations: ['Hospital Álvaro Cunqueiro', 'Beade', 'Praza de España', 'Urzáiz'] }
+      ],
+      stops: [
+        'Praza de América', 'Gran Vía', 'Urzáiz', 'Policarpo Sanz', 'Praza de España',
+        'Torrecedeira', 'Rúa de Barcelona', 'Berbés', 'Camelias', 'Castrelos',
+        'Bouzas', 'Teis', 'Saiáns', 'Canido', 'CUVI (Campus Universitario)',
+        'Navia', 'S. Badía', 'Aragón', 'G. Espino', 'Encarnación',
+        'Hospital Álvaro Cunqueiro', 'Beade', 'Coia'
+      ],
+      prices: {
+        ordinario: 1.63,
+        passVigoGeneral: 0.56,
+        passVigoEstudiante: 0.54,
+        passVigoUniversitario: 0.42,
+        passVigoSocial: 0.46
+      }
+    };
+
+    // ==================== ESTADO DEL JUEGO ====================
+    let gameState = {
+      mode: 'mixed',
+      round: 0,
+      totalRounds: 10,
+      score: 0,
+      streak: 0,
+      bestStreak: 0,
+      correctAnswers: 0,
+      timeLeft: 15,
+      timerInterval: null,
+      challenges: [],
+      currentChallenge: null,
+      memoryCards: [],
+      flippedCards: [],
+      matchedPairs: 0,
+      isProcessing: false
+    };
+
+    // ==================== INICIALIZACIÓN SDK ====================
+    async function initSDKs() {
+      // Element SDK
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange: async (newConfig) => {
+            config = { ...defaultConfig, ...newConfig };
+            updateUI();
           },
-          {
-            get: () => cfg.card_border_color || defaultConfig.card_border_color,
-            set: (value) => window.elementSdk.setConfig({ card_border_color: value })
-          },
-          {
-            get: () => cfg.text_color || defaultConfig.text_color,
-            set: (value) => window.elementSdk.setConfig({ text_color: value })
-          },
-          {
-            get: () => cfg.accent_color || defaultConfig.accent_color,
-            set: (value) => window.elementSdk.setConfig({ accent_color: value })
-          },
-          {
-            get: () => cfg.button_color || defaultConfig.button_color,
-            set: (value) => window.elementSdk.setConfig({ button_color: value })
+          mapToCapabilities: (cfg) => ({
+            recolorables: [
+              {
+                get: () => cfg.primary_color || defaultConfig.primary_color,
+                set: (v) => { cfg.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); }
+              },
+              {
+                get: () => cfg.secondary_color || defaultConfig.secondary_color,
+                set: (v) => { cfg.secondary_color = v; window.elementSdk.setConfig({ secondary_color: v }); }
+              },
+              {
+                get: () => cfg.text_color || defaultConfig.text_color,
+                set: (v) => { cfg.text_color = v; window.elementSdk.setConfig({ text_color: v }); }
+              },
+              {
+                get: () => cfg.accent_color || defaultConfig.accent_color,
+                set: (v) => { cfg.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); }
+              },
+              {
+                get: () => cfg.surface_color || defaultConfig.surface_color,
+                set: (v) => { cfg.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }
+              }
+            ],
+            borderables: [],
+            fontEditable: undefined,
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (cfg) => new Map([
+            ['game_title', cfg.game_title || defaultConfig.game_title],
+            ['welcome_message', cfg.welcome_message || defaultConfig.welcome_message]
+          ])
+        });
+      }
+
+      // Data SDK
+      if (window.dataSdk) {
+        const dataHandler = {
+          onDataChanged: (data) => {
+            allScores = data;
+            updateLeaderboard();
+            updatePlayerStats();
           }
-        ],
-        borderables: [],
-        fontEditable: {
-          get: () => cfg.font_family || defaultConfig.font_family,
-          set: (value) => window.elementSdk.setConfig({ font_family: value })
-        },
-        fontSizeable: undefined
-      }),
-      mapToEditPanelValues: (cfg) => new Map([
-        ['game_title', cfg.game_title || defaultConfig.game_title],
-        ['instruction_text', cfg.instruction_text || defaultConfig.instruction_text]
-      ])
+        };
+        
+        const result = await window.dataSdk.init(dataHandler);
+        if (!result.isOk) {
+          console.error('Error inicializando Data SDK');
+        }
+      }
+    }
+
+    function updateUI() {
+      const title = document.getElementById('main-title');
+      const welcome = document.getElementById('welcome-text');
+      
+      if (title) title.textContent = config.game_title || defaultConfig.game_title;
+      if (welcome) welcome.textContent = config.welcome_message || defaultConfig.welcome_message;
+      
+      document.body.style.color = config.text_color || defaultConfig.text_color;
+    }
+
+    // ==================== GESTIÓN DE PUNTUACIONES ====================
+    function updateLeaderboard() {
+      const container = document.getElementById('leaderboard');
+      if (!container) return;
+
+      if (allScores.length === 0) {
+        container.innerHTML = '<p class="text-gray-400 text-center py-4">Aún no hay puntuaciones. ¡Sé el primero!</p>';
+        return;
+      }
+
+      const sorted = [...allScores].sort((a, b) => b.total_score - a.total_score).slice(0, 10);
+      
+      container.innerHTML = sorted.map((score, index) => {
+        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+        const isCurrentPlayer = currentPlayer && score.__backendId === currentPlayer.__backendId;
+        
+        return `
+          <div class="leaderboard-row flex items-center justify-between p-3 rounded-xl ${isCurrentPlayer ? 'bg-yellow-500/20 border border-yellow-500/50' : 'bg-white/5'}" style="animation-delay: ${index * 0.05}s">
+            <div class="flex items-center gap-3">
+              <span class="text-xl w-8">${medal}</span>
+              <span class="font-semibold ${isCurrentPlayer ? 'text-yellow-400' : ''}">${score.player_name}</span>
+            </div>
+            <div class="text-right">
+              <span class="font-bold text-yellow-400">${score.total_score}</span>
+              <span class="text-xs text-gray-400 ml-1">pts</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updatePlayerStats() {
+      if (!currentPlayer) {
+        const savedName = localStorage.getItem('vitrasaPlayerName');
+        if (savedName) {
+          currentPlayer = allScores.find(s => s.player_name === savedName);
+        }
+      }
+
+      const nameDisplay = document.getElementById('player-name-display');
+      const scoreEl = document.getElementById('stat-score');
+      const gamesEl = document.getElementById('stat-games');
+      const streakEl = document.getElementById('stat-streak');
+
+      if (currentPlayer) {
+        if (nameDisplay) nameDisplay.textContent = currentPlayer.player_name;
+        if (scoreEl) scoreEl.textContent = currentPlayer.total_score;
+        if (gamesEl) gamesEl.textContent = currentPlayer.games_played;
+        if (streakEl) streakEl.textContent = currentPlayer.best_streak;
+      } else {
+        if (nameDisplay) nameDisplay.textContent = 'Anónimo';
+        if (scoreEl) scoreEl.textContent = '0';
+        if (gamesEl) gamesEl.textContent = '0';
+        if (streakEl) streakEl.textContent = '0';
+      }
+    }
+
+    async function savePlayerScore() {
+      if (!window.dataSdk) return;
+      
+      const nameInput = document.getElementById('player-name-input');
+      const playerName = currentPlayer?.player_name || nameInput?.value?.trim() || 'Anónimo';
+
+      if (currentPlayer) {
+        currentPlayer.total_score += gameState.score;
+        currentPlayer.games_played += 1;
+        currentPlayer.best_streak = Math.max(currentPlayer.best_streak, gameState.bestStreak);
+        
+        const result = await window.dataSdk.update(currentPlayer);
+        if (!result.isOk) {
+          console.error('Error actualizando puntuación');
+        }
+      } else if (playerName !== 'Anónimo') {
+        if (allScores.length >= 999) {
+          showToast('El ranking está lleno. No se puede guardar la puntuación.');
+          return;
+        }
+        
+        const result = await window.dataSdk.create({
+          player_name: playerName,
+          total_score: gameState.score,
+          games_played: 1,
+          best_streak: gameState.bestStreak,
+          created_at: new Date().toISOString()
+        });
+        
+        if (result.isOk) {
+          localStorage.setItem('vitrasaPlayerName', playerName);
+        }
+      }
+    }
+
+    // ==================== GESTIÓN DE NOMBRE ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      const saveBtn = document.getElementById('save-name-btn');
+      const nameInput = document.getElementById('player-name-input');
+      
+      const savedName = localStorage.getItem('vitrasaPlayerName');
+      if (savedName && nameInput) {
+        nameInput.value = savedName;
+      }
+
+      if (saveBtn) {
+        saveBtn.addEventListener('click', async () => {
+          const name = nameInput?.value?.trim();
+          if (!name) {
+            showToast('Por favor, escribe tu nombre');
+            return;
+          }
+          
+          localStorage.setItem('vitrasaPlayerName', name);
+          currentPlayer = allScores.find(s => s.player_name === name);
+          updatePlayerStats();
+          showToast('¡Nombre guardado!');
+        });
+      }
     });
 
-    function applyConfig() {
-      const bgColor = config.background_color || defaultConfig.background_color;
-      const borderColor = config.card_border_color || defaultConfig.card_border_color;
-      const textColor = config.text_color || defaultConfig.text_color;
-      const accentColor = config.accent_color || defaultConfig.accent_color;
-      const buttonColor = config.button_color || defaultConfig.button_color;
-      const fontFamily = config.font_family || defaultConfig.font_family;
-
-      const app = document.getElementById('app');
-      app.style.background = `linear-gradient(135deg, ${bgColor} 0%, ${adjustBrightness(bgColor, 30)} 50%, ${bgColor} 100%)`;
-
-      document.getElementById('game-title').textContent = config.game_title || defaultConfig.game_title;
-      document.getElementById('game-title').style.color = textColor;
-      document.getElementById('instruction-text').textContent = config.instruction_text || defaultConfig.instruction_text;
-      document.getElementById('instruction-text').style.color = adjustBrightness(textColor, -20);
-
-      document.querySelectorAll('.card').forEach(card => {
-        card.style.borderColor = borderColor;
+    // ==================== NAVEGACIÓN ====================
+    function showScreen(screenId) {
+      ['screen-home', 'screen-game', 'screen-results'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
       });
+      const screen = document.getElementById(screenId);
+      if (screen) screen.classList.remove('hidden');
+    }
 
-      const startBtn = document.getElementById('start-btn');
-      startBtn.style.backgroundColor = buttonColor;
-      startBtn.style.color = bgColor;
+    function showHome() {
+      stopTimer();
+      showScreen('screen-home');
+      updateLeaderboard();
+      updatePlayerStats();
+    }
 
-      const restartBtn = document.getElementById('restart-btn');
-      restartBtn.style.backgroundColor = borderColor;
+    function exitGame() {
+      if (gameState.score > 0) {
+        showResults();
+      } else {
+        showHome();
+      }
+    }
 
-      document.getElementById('streak').style.color = accentColor;
+    // ==================== TOAST NOTIFICATIONS ====================
+    function showToast(message, duration = 3000) {
+      const existing = document.querySelector('.toast-notification');
+      if (existing) existing.remove();
 
-      // Apply font
-      document.querySelectorAll('*').forEach(el => {
-        el.style.fontFamily = `${fontFamily}, Nunito, sans-serif`;
+      const toast = document.createElement('div');
+      toast.className = 'toast-notification fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-lg z-50 fade-in';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+
+      setTimeout(() => toast.remove(), duration);
+    }
+
+    // ==================== LÓGICA DEL JUEGO ====================
+    function startMixedGame() {
+      gameState = {
+        mode: 'mixed',
+        round: 0,
+        totalRounds: 10,
+        score: 0,
+        streak: 0,
+        bestStreak: 0,
+        correctAnswers: 0,
+        timeLeft: 15,
+        timerInterval: null,
+        challenges: generateMixedChallenges(10),
+        currentChallenge: null,
+        memoryCards: [],
+        flippedCards: [],
+        matchedPairs: 0,
+        isProcessing: false
+      };
+
+      showScreen('screen-game');
+      nextRound();
+    }
+
+    function startChallenge(type) {
+      gameState = {
+        mode: type,
+        round: 0,
+        totalRounds: 5,
+        score: 0,
+        streak: 0,
+        bestStreak: 0,
+        correctAnswers: 0,
+        timeLeft: 15,
+        timerInterval: null,
+        challenges: generateChallengesOfType(type, 5),
+        currentChallenge: null,
+        memoryCards: [],
+        flippedCards: [],
+        matchedPairs: 0,
+        isProcessing: false
+      };
+
+      showScreen('screen-game');
+      nextRound();
+    }
+
+    function generateMixedChallenges(count) {
+      const types = ['memory', 'calculation', 'routes', 'sequence', 'speed', 'pairs'];
+      const challenges = [];
+      
+      for (let i = 0; i < count; i++) {
+        const type = types[i % types.length];
+        challenges.push(generateChallenge(type));
+      }
+      
+      return shuffleArray(challenges);
+    }
+
+    function generateChallengesOfType(type, count) {
+      const challenges = [];
+      for (let i = 0; i < count; i++) {
+        challenges.push(generateChallenge(type));
+      }
+      return challenges;
+    }
+
+    function generateChallenge(type) {
+      switch (type) {
+        case 'memory': return generateMemoryChallenge();
+        case 'calculation': return generateCalculationChallenge();
+        case 'routes': return generateRoutesChallenge();
+        case 'sequence': return generateSequenceChallenge();
+        case 'speed': return generateSpeedChallenge();
+        case 'pairs': return generatePairsChallenge();
+        default: return generateSpeedChallenge();
+      }
+    }
+
+    // ==================== GENERADORES DE DESAFÍOS ====================
+    function generateMemoryChallenge() {
+      const lines = shuffleArray([...vitrasaData.lines]).slice(0, 6);
+      const pairs = lines.map(line => [
+        { id: `line-${line.number}`, type: 'line', value: line.number, color: line.color, pairId: line.number },
+        { id: `dest-${line.number}`, type: 'dest', value: line.destinations[0], color: line.color, pairId: line.number }
+      ]).flat();
+      
+      return {
+        type: 'memory',
+        title: '🎴 Memoria de Rutas',
+        instruction: 'Encuentra las parejas: línea con su destino principal',
+        cards: shuffleArray(pairs),
+        timeLimit: 45
+      };
+    }
+
+    function generateCalculationChallenge() {
+      const scenarios = [
+        () => {
+          const passengers = Math.floor(Math.random() * 5) + 2;
+          const price = vitrasaData.prices.ordinario;
+          return {
+            question: `${passengers} pasajeros compran billete ordinario (${price}€ cada uno). ¿Cuánto pagan en total?`,
+            answer: (passengers * price).toFixed(2),
+            options: generateOptions((passengers * price).toFixed(2), 'money')
+          };
+        },
+        () => {
+          const paid = [5, 10, 20][Math.floor(Math.random() * 3)];
+          const trips = Math.floor(Math.random() * 3) + 1;
+          const cost = trips * vitrasaData.prices.ordinario;
+          const change = paid - cost;
+          return {
+            question: `Pago ${paid}€ por ${trips} billete${trips > 1 ? 's' : ''} ordinario${trips > 1 ? 's' : ''} (${vitrasaData.prices.ordinario}€). ¿Cuánto me devuelven?`,
+            answer: change.toFixed(2),
+            options: generateOptions(change.toFixed(2), 'money')
+          };
+        },
+        () => {
+          const trips = Math.floor(Math.random() * 5) + 6;
+          const passVigoPrice = vitrasaData.prices.passVigoGeneral;
+          const ordinaryPrice = vitrasaData.prices.ordinario;
+          const passCost = (trips * passVigoPrice).toFixed(2);
+          const ordinaryCost = (trips * ordinaryPrice).toFixed(2);
+          const savings = (ordinaryCost - passCost).toFixed(2);
+          return {
+            question: `¿Cuánto ahorro en ${trips} viajes con PassVigo General (${passVigoPrice}€/viaje) vs billete ordinario (${ordinaryPrice}€)?`,
+            answer: savings,
+            options: generateOptions(savings, 'money')
+          };
+        },
+        () => {
+          const studentPrice = vitrasaData.prices.passVigoEstudiante;
+          const universityPrice = vitrasaData.prices.passVigoUniversitario;
+          const difference = (studentPrice - universityPrice).toFixed(2);
+          return {
+            question: `¿Cuánto más barata es la tarifa universitaria (${universityPrice}€) que la de estudiante (${studentPrice}€) por viaje?`,
+            answer: difference,
+            options: generateOptions(difference, 'money')
+          };
+        },
+        () => {
+          const trips = 20;
+          const socialPrice = vitrasaData.prices.passVigoSocial;
+          const total = (trips * socialPrice).toFixed(2);
+          return {
+            question: `Un usuario con tarifa PassVigo Social (${socialPrice}€/viaje) hace ${trips} viajes al mes. ¿Cuánto paga?`,
+            answer: total,
+            options: generateOptions(total, 'money')
+          };
+        }
+      ];
+      
+      const scenario = scenarios[Math.floor(Math.random() * scenarios.length)]();
+      
+      return {
+        type: 'calculation',
+        title: '🔢 Cálculo Rápido',
+        instruction: 'Resuelve el problema de tarifas',
+        ...scenario,
+        timeLimit: 20
+      };
+    }
+
+    function generateRoutesChallenge() {
+      const line = vitrasaData.lines[Math.floor(Math.random() * vitrasaData.lines.length)];
+      const destination = line.destinations[Math.floor(Math.random() * line.destinations.length)];
+      
+      const wrongLines = vitrasaData.lines
+        .filter(l => l.number !== line.number && !l.destinations.includes(destination))
+        .slice(0, 3)
+        .map(l => l.number);
+      
+      const options = shuffleArray([line.number, ...wrongLines]);
+      
+      return {
+        type: 'routes',
+        title: '🗺️ ¿Qué Línea?',
+        instruction: `¿Qué línea pasa por ${destination}?`,
+        question: destination,
+        answer: line.number,
+        options: options,
+        lineInfo: line,
+        timeLimit: 12
+      };
+    }
+
+    function generateSequenceChallenge() {
+      const line = vitrasaData.lines[Math.floor(Math.random() * vitrasaData.lines.length)];
+      const stops = [...line.destinations];
+      const correctOrder = [...stops];
+      const shuffledStops = shuffleArray([...stops]);
+      
+      return {
+        type: 'sequence',
+        title: '🔄 Orden de Paradas',
+        instruction: `Ordena las paradas de la línea ${line.number}`,
+        lineName: line.name,
+        lineNumber: line.number,
+        lineColor: line.color,
+        stops: shuffledStops,
+        correctOrder: correctOrder,
+        timeLimit: 25
+      };
+    }
+
+    function generateSpeedChallenge() {
+      const types = ['color', 'destination', 'count'];
+      const type = types[Math.floor(Math.random() * types.length)];
+      
+      if (type === 'color') {
+        const line = vitrasaData.lines[Math.floor(Math.random() * vitrasaData.lines.length)];
+        return {
+          type: 'speed',
+          subtype: 'color',
+          title: '⚡ Respuesta Rápida',
+          instruction: '¿De qué color es esta línea?',
+          lineNumber: line.number,
+          lineColor: line.color,
+          answer: line.color,
+          options: shuffleArray([line.color, ...getRandomColors(3, line.color)]),
+          timeLimit: 8
+        };
+      } else if (type === 'destination') {
+        const line = vitrasaData.lines[Math.floor(Math.random() * vitrasaData.lines.length)];
+        const wrongDest = vitrasaData.stops.filter(s => !line.destinations.includes(s)).slice(0, 3);
+        return {
+          type: 'speed',
+          subtype: 'destination',
+          title: '⚡ Respuesta Rápida',
+          instruction: `¿Cuál es un destino de la línea ${line.number}?`,
+          lineNumber: line.number,
+          answer: line.destinations[0],
+          options: shuffleArray([line.destinations[0], ...wrongDest]),
+          timeLimit: 10
+        };
+      } else {
+        const count = Math.floor(Math.random() * 4) + 3;
+        return {
+          type: 'speed',
+          subtype: 'count',
+          title: '⚡ Respuesta Rápida',
+          instruction: '¿Cuántos buses ves?',
+          busCount: count,
+          answer: count.toString(),
+          options: shuffleArray([count.toString(), (count-1).toString(), (count+1).toString(), (count+2).toString()]),
+          timeLimit: 8
+        };
+      }
+    }
+
+    function generatePairsChallenge() {
+      const selectedLines = shuffleArray([...vitrasaData.lines]).slice(0, 4);
+      const pairs = selectedLines.map(line => ({
+        line: line.number,
+        destination: line.destinations[line.destinations.length - 1],
+        color: line.color
+      }));
+      
+      return {
+        type: 'pairs',
+        title: '👯 Une las Parejas',
+        instruction: 'Conecta cada línea con su destino final',
+        pairs: pairs,
+        shuffledDestinations: shuffleArray(pairs.map(p => p.destination)),
+        timeLimit: 20
+      };
+    }
+
+    // ==================== RENDERIZADO DE DESAFÍOS ====================
+    function renderChallenge(challenge) {
+      const area = document.getElementById('challenge-area');
+      if (!area) return;
+
+      let html = `
+        <div class="text-center mb-4">
+          <h2 class="text-2xl font-bold mb-1">${challenge.title}</h2>
+          <p class="text-gray-300">${challenge.instruction}</p>
+        </div>
+      `;
+
+      switch (challenge.type) {
+        case 'memory':
+          html += renderMemoryChallenge(challenge);
+          break;
+        case 'calculation':
+          html += renderCalculationChallenge(challenge);
+          break;
+        case 'routes':
+          html += renderRoutesChallenge(challenge);
+          break;
+        case 'sequence':
+          html += renderSequenceChallenge(challenge);
+          break;
+        case 'speed':
+          html += renderSpeedChallenge(challenge);
+          break;
+        case 'pairs':
+          html += renderPairsChallenge(challenge);
+          break;
+      }
+
+      area.innerHTML = html;
+      
+      if (challenge.type === 'sequence') {
+        initDragAndDrop();
+      }
+    }
+
+    function renderMemoryChallenge(challenge) {
+      gameState.memoryCards = challenge.cards;
+      gameState.flippedCards = [];
+      gameState.matchedPairs = 0;
+
+      return `
+        <div class="grid grid-cols-3 md:grid-cols-4 gap-3" id="memory-grid">
+          ${challenge.cards.map((card, index) => `
+            <div class="memory-card aspect-square" data-index="${index}" onclick="flipCard(${index})">
+              <div class="memory-card-inner relative w-full h-full">
+                <div class="memory-card-front bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
+                  <span class="text-3xl">���</span>
+                </div>
+                <div class="memory-card-back bg-white flex flex-col items-center justify-center p-2">
+                  ${card.type === 'line' ? `
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg" style="background-color: ${card.color}">
+                      ${card.value}
+                    </div>
+                    <p class="text-xs text-gray-600 mt-1">Línea</p>
+                  ` : `
+                    <div class="w-3 h-3 rounded-full mb-1" style="background-color: ${card.color}"></div>
+                    <p class="text-sm font-semibold text-gray-800 text-center">${card.value}</p>
+                  `}
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <p class="text-center mt-4 text-gray-400">Parejas encontradas: <span id="pairs-count">0</span>/${challenge.cards.length / 2}</p>
+      `;
+    }
+
+    function renderCalculationChallenge(challenge) {
+      return `
+        <div class="bg-white/10 rounded-xl p-6 mb-6">
+          <p class="text-xl text-center">${challenge.question}</p>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          ${challenge.options.map(option => `
+            <button onclick="checkAnswer('${option}')" class="bus-card rounded-xl p-4 text-center text-gray-800 text-2xl font-bold hover:scale-105 transition">
+              ${option}€
+            </button>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderRoutesChallenge(challenge) {
+      return `
+        <div class="text-center mb-6">
+          <div class="inline-block bg-white/20 rounded-2xl px-8 py-4">
+            <p class="text-3xl font-bold">${challenge.question}</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          ${challenge.options.map(option => {
+            const line = vitrasaData.lines.find(l => l.number === option);
+            return `
+              <button onclick="checkAnswer('${option}')" class="bus-card rounded-xl p-4 flex items-center justify-center gap-3 hover:scale-105 transition">
+                <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-xl" style="background-color: ${line?.color || '#666'}">
+                  ${option}
+                </div>
+                <span class="text-gray-800 font-semibold">Línea ${option}</span>
+              </button>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function renderSequenceChallenge(challenge) {
+      return `
+        <div class="flex items-center justify-center gap-3 mb-6">
+          <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-xl" style="background-color: ${challenge.lineColor}">
+            ${challenge.lineNumber}
+          </div>
+          <span class="text-xl font-semibold">${challenge.lineName}</span>
+        </div>
+        <div id="sequence-container" class="space-y-2">
+          ${challenge.stops.map((stop, index) => `
+            <div class="sequence-item bus-card rounded-xl p-3 cursor-move flex items-center gap-3" data-stop="${stop}" draggable="true">
+              <span class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold">${index + 1}</span>
+              <span class="text-gray-800 font-semibold">${stop}</span>
+              <span class="ml-auto text-gray-400">≡</span>
+            </div>
+          `).join('')}
+        </div>
+        <button onclick="checkSequence()" class="w-full mt-4 btn-primary py-3 rounded-xl font-bold text-gray-900">
+          ✓ Comprobar Orden
+        </button>
+      `;
+    }
+
+    function renderSpeedChallenge(challenge) {
+      let visualContent = '';
+      
+      if (challenge.subtype === 'color') {
+        visualContent = `
+          <div class="flex justify-center mb-6">
+            <div class="w-24 h-24 rounded-full flex items-center justify-center text-white font-bold text-4xl" style="background-color: ${challenge.lineColor}">
+              ${challenge.lineNumber}
+            </div>
+          </div>
+        `;
+      } else if (challenge.subtype === 'count') {
+        const buses = [];
+        for (let i = 0; i < challenge.busCount; i++) {
+          buses.push(`
+            <div class="transform" style="transform: rotate(${Math.random() * 20 - 10}deg)">
+              <svg width="50" height="35" viewBox="0 0 50 35">
+                <rect x="2" y="5" width="46" height="25" rx="5" fill="#ffc107"/>
+                <rect x="6" y="8" width="12" height="10" rx="2" fill="#1a1a2e"/>
+                <rect x="32" y="8" width="12" height="10" rx="2" fill="#1a1a2e"/>
+                <circle cx="12" cy="30" r="5" fill="#333"/>
+                <circle cx="38" cy="30" r="5" fill="#333"/>
+              </svg>
+            </div>
+          `);
+        }
+        visualContent = `
+          <div class="flex flex-wrap justify-center gap-4 mb-6">
+            ${buses.join('')}
+          </div>
+        `;
+      }
+
+      return `
+        ${visualContent}
+        <div class="grid grid-cols-2 gap-4">
+          ${challenge.options.map(option => {
+            if (challenge.subtype === 'color') {
+              return `
+                <button onclick="checkAnswer('${option}')" class="bus-card rounded-xl p-4 flex items-center justify-center gap-3 hover:scale-105 transition">
+                  <div class="w-10 h-10 rounded-full" style="background-color: ${option}"></div>
+                </button>
+              `;
+            } else {
+              return `
+                <button onclick="checkAnswer('${option}')" class="bus-card rounded-xl p-4 text-center text-gray-800 text-2xl font-bold hover:scale-105 transition">
+                  ${option}
+                </button>
+              `;
+            }
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function renderPairsChallenge(challenge) {
+      gameState.selectedLine = null;
+      gameState.pairsMatched = [];
+
+      return `
+        <div class="grid grid-cols-2 gap-6">
+          <div class="space-y-3">
+            <h3 class="text-center font-semibold text-gray-300 mb-2">Líneas</h3>
+            ${challenge.pairs.map(pair => `
+              <button onclick="selectLine('${pair.line}')" id="line-${pair.line}" 
+                      class="w-full bus-card rounded-xl p-3 flex items-center gap-3 transition">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold" style="background-color: ${pair.color}">
+                  ${pair.line}
+                </div>
+                <span class="text-gray-800 font-semibold">Línea ${pair.line}</span>
+              </button>
+            `).join('')}
+          </div>
+          <div class="space-y-3">
+            <h3 class="text-center font-semibold text-gray-300 mb-2">Destinos</h3>
+            ${challenge.shuffledDestinations.map(dest => `
+              <button onclick="selectDestination('${dest}')" id="dest-${dest.replace(/\s+/g, '-')}" 
+                      class="w-full bus-card rounded-xl p-3 text-center text-gray-800 font-semibold transition">
+                ${dest}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+        <p class="text-center mt-4 text-gray-400">Parejas unidas: <span id="pairs-matched">0</span>/${challenge.pairs.length}</p>
+      `;
+    }
+
+    // ==================== LÓGICA DE MEMORIA ====================
+    function flipCard(index) {
+      if (gameState.isProcessing) return;
+      if (gameState.flippedCards.includes(index)) return;
+      if (gameState.flippedCards.length >= 2) return;
+
+      const card = gameState.memoryCards[index];
+      const cardEl = document.querySelectorAll('.memory-card')[index];
+      
+      if (cardEl.classList.contains('matched')) return;
+      
+      cardEl.classList.add('flipped');
+      gameState.flippedCards.push(index);
+
+      if (gameState.flippedCards.length === 2) {
+        gameState.isProcessing = true;
+        const [first, second] = gameState.flippedCards;
+        const card1 = gameState.memoryCards[first];
+        const card2 = gameState.memoryCards[second];
+
+        if (card1.pairId === card2.pairId && card1.type !== card2.type) {
+          setTimeout(() => {
+            document.querySelectorAll('.memory-card')[first].classList.add('matched');
+            document.querySelectorAll('.memory-card')[second].classList.add('matched');
+            gameState.matchedPairs++;
+            document.getElementById('pairs-count').textContent = gameState.matchedPairs;
+            
+            if (gameState.matchedPairs === gameState.memoryCards.length / 2) {
+              handleCorrectAnswer(true);
+            }
+            
+            gameState.flippedCards = [];
+            gameState.isProcessing = false;
+          }, 500);
+        } else {
+          setTimeout(() => {
+            document.querySelectorAll('.memory-card')[first].classList.remove('flipped');
+            document.querySelectorAll('.memory-card')[second].classList.remove('flipped');
+            gameState.flippedCards = [];
+            gameState.isProcessing = false;
+          }, 1000);
+        }
+      }
+    }
+
+    // ==================== LÓGICA DE SECUENCIA ====================
+    function initDragAndDrop() {
+      const container = document.getElementById('sequence-container');
+      if (!container) return;
+
+      let draggedItem = null;
+
+      container.querySelectorAll('.sequence-item').forEach(item => {
+        item.addEventListener('dragstart', (e) => {
+          draggedItem = item;
+          item.classList.add('opacity-50');
+        });
+
+        item.addEventListener('dragend', () => {
+          item.classList.remove('opacity-50');
+          updateSequenceNumbers();
+        });
+
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          const afterElement = getDragAfterElement(container, e.clientY);
+          if (afterElement) {
+            container.insertBefore(draggedItem, afterElement);
+          } else {
+            container.appendChild(draggedItem);
+          }
+        });
       });
     }
 
-    function adjustBrightness(hex, percent) {
-      const num = parseInt(hex.replace('#', ''), 16);
-      const amt = Math.round(2.55 * percent);
-      const R = Math.min(255, Math.max(0, (num >> 16) + amt));
-      const G = Math.min(255, Math.max(0, (num >> 8 & 0x00FF) + amt));
-      const B = Math.min(255, Math.max(0, (num & 0x0000FF) + amt));
-      return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+    function getDragAfterElement(container, y) {
+      const elements = [...container.querySelectorAll('.sequence-item:not(.opacity-50)')];
+      return elements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+          return { offset, element: child };
+        }
+        return closest;
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
-    // Shuffle array
-    function shuffle(array) {
+    function updateSequenceNumbers() {
+      const items = document.querySelectorAll('.sequence-item');
+      items.forEach((item, index) => {
+        item.querySelector('span').textContent = index + 1;
+      });
+    }
+
+    function checkSequence() {
+      const items = document.querySelectorAll('.sequence-item');
+      const userOrder = [...items].map(item => item.dataset.stop);
+      const correctOrder = gameState.currentChallenge.correctOrder;
+      
+      const isCorrect = JSON.stringify(userOrder) === JSON.stringify(correctOrder);
+      
+      items.forEach((item, index) => {
+        if (userOrder[index] === correctOrder[index]) {
+          item.classList.add('correct');
+        } else {
+          item.classList.add('incorrect');
+        }
+      });
+
+      setTimeout(() => {
+        handleCorrectAnswer(isCorrect);
+      }, 1000);
+    }
+
+    // ==================== LÓGICA DE PAREJAS ====================
+    function selectLine(lineNumber) {
+      document.querySelectorAll('[id^="line-"]').forEach(el => el.classList.remove('selected'));
+      document.getElementById(`line-${lineNumber}`).classList.add('selected');
+      gameState.selectedLine = lineNumber;
+    }
+
+    function selectDestination(destination) {
+      if (!gameState.selectedLine) {
+        showToast('Primero selecciona una línea');
+        return;
+      }
+
+      const pair = gameState.currentChallenge.pairs.find(p => p.line === gameState.selectedLine);
+      const isCorrect = pair && pair.destination === destination;
+
+      const lineEl = document.getElementById(`line-${gameState.selectedLine}`);
+      const destEl = document.getElementById(`dest-${destination.replace(/\s+/g, '-')}`);
+
+      if (isCorrect) {
+        lineEl.classList.add('correct');
+        destEl.classList.add('correct');
+        lineEl.disabled = true;
+        destEl.disabled = true;
+        
+        if (!gameState.pairsMatched) gameState.pairsMatched = [];
+        gameState.pairsMatched.push(gameState.selectedLine);
+        document.getElementById('pairs-matched').textContent = gameState.pairsMatched.length;
+
+        if (gameState.pairsMatched.length === gameState.currentChallenge.pairs.length) {
+          setTimeout(() => handleCorrectAnswer(true), 500);
+        }
+      } else {
+        lineEl.classList.add('incorrect');
+        destEl.classList.add('incorrect');
+        setTimeout(() => {
+          lineEl.classList.remove('incorrect', 'selected');
+          destEl.classList.remove('incorrect');
+        }, 500);
+      }
+
+      gameState.selectedLine = null;
+    }
+
+    // ==================== COMPROBACIÓN DE RESPUESTAS ====================
+    function checkAnswer(answer) {
+      const challenge = gameState.currentChallenge;
+      const isCorrect = answer === challenge.answer || answer === challenge.answer.toString();
+      
+      const buttons = document.querySelectorAll('.bus-card');
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        if (btn.textContent.includes(challenge.answer) || btn.querySelector(`[style*="${challenge.answer}"]`)) {
+          btn.classList.add('correct');
+        } else if (btn.textContent.includes(answer) || btn.onclick?.toString().includes(answer)) {
+          if (!isCorrect) btn.classList.add('incorrect');
+        }
+      });
+
+      setTimeout(() => handleCorrectAnswer(isCorrect), 800);
+    }
+
+    function handleCorrectAnswer(isCorrect) {
+      stopTimer();
+
+      if (isCorrect) {
+        const timeBonus = Math.floor(gameState.timeLeft * 2);
+        const points = 100 + timeBonus;
+        gameState.score += points;
+        gameState.streak++;
+        gameState.correctAnswers++;
+        gameState.bestStreak = Math.max(gameState.bestStreak, gameState.streak);
+        
+        showToast(`¡Correcto! +${points} puntos 🎉`);
+      } else {
+        gameState.streak = 0;
+        showToast('¡Incorrecto! 😅');
+      }
+
+      updateGameUI();
+
+      setTimeout(() => {
+        if (gameState.round < gameState.totalRounds) {
+          nextRound();
+        } else {
+          showResults();
+        }
+      }, 1500);
+    }
+
+    // ==================== CONTROL DE RONDAS ====================
+    function nextRound() {
+      gameState.round++;
+      gameState.currentChallenge = gameState.challenges[gameState.round - 1];
+      gameState.timeLeft = gameState.currentChallenge.timeLimit;
+
+      updateGameUI();
+      renderChallenge(gameState.currentChallenge);
+      startTimer();
+    }
+
+    function updateGameUI() {
+      document.getElementById('game-score').textContent = gameState.score;
+      document.getElementById('round-display').textContent = `${gameState.round}/${gameState.totalRounds}`;
+      document.getElementById('current-streak').textContent = gameState.streak;
+      
+      const streakEl = document.getElementById('current-streak');
+      if (gameState.streak >= 3) {
+        streakEl.classList.add('streak-fire');
+      } else {
+        streakEl.classList.remove('streak-fire');
+      }
+    }
+
+    // ==================== TEMPORIZADOR ====================
+    function startTimer() {
+      const timerBar = document.getElementById('timer-bar');
+      const totalTime = gameState.currentChallenge.timeLimit;
+      
+      gameState.timerInterval = setInterval(() => {
+        gameState.timeLeft -= 0.1;
+        const percentage = (gameState.timeLeft / totalTime) * 100;
+        timerBar.style.width = `${Math.max(0, percentage)}%`;
+        
+        if (gameState.timeLeft <= 0) {
+          stopTimer();
+          handleCorrectAnswer(false);
+        }
+      }, 100);
+    }
+
+    function stopTimer() {
+      if (gameState.timerInterval) {
+        clearInterval(gameState.timerInterval);
+        gameState.timerInterval = null;
+      }
+    }
+
+    // ==================== RESULTADOS ====================
+    async function showResults() {
+      stopTimer();
+      
+      document.getElementById('result-score').textContent = gameState.score;
+      document.getElementById('result-correct').textContent = gameState.correctAnswers;
+      document.getElementById('result-streak').textContent = gameState.bestStreak;
+
+      let message = '';
+      if (gameState.score >= 800) {
+        message = '🏆 ¡Eres un experto de Vitrasa!';
+      } else if (gameState.score >= 500) {
+        message = '🌟 ¡Muy buen trabajo, viajero!';
+      } else if (gameState.score >= 300) {
+        message = '👍 ¡Buen comienzo! Sigue practicando.';
+      } else {
+        message = '🚌 ¡A seguir conociendo las rutas!';
+      }
+      document.getElementById('result-message').textContent = message;
+
+      await savePlayerScore();
+      showScreen('screen-results');
+    }
+
+    // ==================== UTILIDADES ====================
+    function shuffleArray(array) {
       const arr = [...array];
       for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -256,195 +1331,32 @@
       return arr;
     }
 
-    // Generate card with symbols
-    function generateCard(symbols, cardElement, isCard1) {
-      cardElement.innerHTML = '';
-      const positions = [
-        { x: 50, y: 25, size: 28 },
-        { x: 25, y: 50, size: 26 },
-        { x: 75, y: 50, size: 26 },
-        { x: 35, y: 75, size: 24 },
-        { x: 65, y: 75, size: 24 },
-        { x: 50, y: 50, size: 22 }
-      ];
-
-      const shuffledPositions = shuffle(positions);
-
-      symbols.forEach((symbol, index) => {
-        const pos = shuffledPositions[index];
-        const rotation = Math.random() * 60 - 30;
-        
-        const symbolDiv = document.createElement('div');
-        symbolDiv.className = 'symbol absolute';
-        symbolDiv.style.cssText = `
-          left: ${pos.x}%;
-          top: ${pos.y}%;
-          width: ${pos.size}%;
-          height: ${pos.size}%;
-          transform: translate(-50%, -50%) rotate(${rotation}deg);
-        `;
-        symbolDiv.innerHTML = symbol.svg;
-        symbolDiv.dataset.symbolId = symbol.id;
-        symbolDiv.title = symbol.name;
-        
-        symbolDiv.addEventListener('click', () => handleSymbolClick(symbol.id, symbolDiv));
-        
-        cardElement.appendChild(symbolDiv);
-      });
-    }
-
-    // Generate new round
-    function generateNewRound() {
-      const shuffledSymbols = shuffle(vitrasaSymbols);
+    function generateOptions(correct, type) {
+      const correctNum = parseFloat(correct);
+      let options = [correct];
       
-      // Pick 6 symbols for card 1
-      const card1Symbols = shuffledSymbols.slice(0, 6);
-      
-      // Pick 5 different symbols + 1 matching symbol for card 2
-      const matchingSymbol = card1Symbols[Math.floor(Math.random() * card1Symbols.length)];
-      const remainingSymbols = shuffledSymbols.filter(s => !card1Symbols.includes(s));
-      const card2Symbols = shuffle([matchingSymbol, ...remainingSymbols.slice(0, 5)]);
-      
-      currentMatch = matchingSymbol.id;
-      
-      generateCard(card1Symbols, document.getElementById('card1'), true);
-      generateCard(card2Symbols, document.getElementById('card2'), false);
-    }
-
-    // Handle symbol click
-    function handleSymbolClick(symbolId, element) {
-      if (!gameRunning) return;
-      
-      if (symbolId === currentMatch) {
-        // Correct!
-        element.classList.add('correct');
-        score += 10 + (streak * 2);
-        streak++;
-        
-        document.getElementById('score').textContent = score;
-        document.getElementById('streak').textContent = streak;
-        
-        showFeedback('¡Correcto! +' + (10 + ((streak - 1) * 2)) + ' puntos', true);
-        createConfetti();
-        
-        setTimeout(() => {
-          generateNewRound();
-        }, 500);
-      } else {
-        // Wrong!
-        element.classList.add('wrong');
-        streak = 0;
-        document.getElementById('streak').textContent = streak;
-        showFeedback('¡Ese no es! Sigue buscando...', false);
-        
-        setTimeout(() => {
-          element.classList.remove('wrong');
-        }, 500);
-      }
-    }
-
-    // Show feedback
-    function showFeedback(message, isPositive) {
-      const feedback = document.getElementById('feedback-text');
-      feedback.textContent = message;
-      feedback.style.color = isPositive ? '#FFD700' : '#FF6B6B';
-      
-      setTimeout(() => {
-        feedback.textContent = '';
-      }, 1500);
-    }
-
-    // Create confetti effect
-    function createConfetti() {
-      const container = document.getElementById('confetti-container');
-      const colors = ['#FFD700', '#2d8a3e', '#FF6B6B', '#4169E1', '#FF69B4'];
-      
-      for (let i = 0; i < 20; i++) {
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        confetti.style.cssText = `
-          left: ${Math.random() * 100}%;
-          background-color: ${colors[Math.floor(Math.random() * colors.length)]};
-          animation-delay: ${Math.random() * 0.5}s;
-        `;
-        container.appendChild(confetti);
-        
-        setTimeout(() => confetti.remove(), 1500);
-      }
-    }
-
-    // Start game
-    function startGame() {
-      score = 0;
-      timeLeft = 60;
-      streak = 0;
-      gameRunning = true;
-      
-      document.getElementById('score').textContent = score;
-      document.getElementById('timer').textContent = timeLeft;
-      document.getElementById('streak').textContent = streak;
-      document.getElementById('start-btn').textContent = '🎮 Jugando...';
-      document.getElementById('start-btn').disabled = true;
-      document.getElementById('game-over').classList.add('hidden');
-      
-      generateNewRound();
-      
-      timerInterval = setInterval(() => {
-        timeLeft--;
-        document.getElementById('timer').textContent = timeLeft;
-        
-        if (timeLeft <= 10) {
-          document.getElementById('timer').style.color = '#FF6B6B';
+      while (options.length < 4) {
+        let variation;
+        if (type === 'money') {
+          variation = (correctNum + (Math.random() * 4 - 2)).toFixed(2);
+        } else {
+          variation = Math.floor(correctNum + Math.random() * 10 - 5).toString();
         }
-        
-        if (timeLeft <= 0) {
-          endGame();
+        if (!options.includes(variation) && parseFloat(variation) > 0) {
+          options.push(variation);
         }
-      }, 1000);
-    }
-
-    // End game
-    function endGame() {
-      gameRunning = false;
-      clearInterval(timerInterval);
-      
-      document.getElementById('start-btn').textContent = '🎮 ¡EMPEZAR!';
-      document.getElementById('start-btn').disabled = false;
-      document.getElementById('timer').style.color = 'white';
-      
-      document.getElementById('final-score').textContent = score;
-      
-      let message = '';
-      if (score >= 200) {
-        message = '🏆 ¡Eres un experto en Vitrasa! ¡Increíble!';
-      } else if (score >= 100) {
-        message = '🌟 ¡Muy bien! Conoces bien el transporte de Vigo.';
-      } else if (score >= 50) {
-        message = '👍 ¡Buen intento! Sigue practicando.';
-      } else {
-        message = '🚌 ¡Sigue viajando con Vitrasa para mejorar!';
       }
       
-      document.getElementById('final-message').textContent = message;
-      document.getElementById('game-over').classList.remove('hidden');
-      
-      // Create celebration confetti
-      for (let i = 0; i < 50; i++) {
-        setTimeout(() => createConfetti(), i * 50);
-      }
+      return shuffleArray(options);
     }
 
-    // Event listeners
-    document.getElementById('start-btn').addEventListener('click', startGame);
-    document.getElementById('restart-btn').addEventListener('click', () => {
-      document.getElementById('game-over').classList.add('hidden');
-      startGame();
-    });
+    function getRandomColors(count, exclude) {
+      const colors = ['#e53935', '#1e88e5', '#43a047', '#fb8c00', '#8e24aa', '#00acc1', '#d81b60', '#5e35b1', '#00897b', '#c0ca33', '#6d4c41', '#546e7a'];
+      return shuffleArray(colors.filter(c => c !== exclude)).slice(0, count);
+    }
 
-    // Initialize
-    config = { ...defaultConfig };
-    applyConfig();
-    generateNewRound();
+    // ==================== INICIALIZACIÓN ====================
+    initSDKs();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c4a520137ee0328',t:'MTc2OTUzODYxNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c4a6c44d1a7fc51',t:'MTc2OTUzOTY5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
