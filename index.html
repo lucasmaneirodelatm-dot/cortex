@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cortex Vitrasa</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"><!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
   <style>
     body {
       box-sizing: border-box;
@@ -139,7 +141,27 @@
   <div id="screen-loader" class="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col items-center justify-center z-50"><img src="https://lucasmaneirodelatm-dot.github.io/cortex/img/Loader.gif" alt="Cargando..." class="w-32 h-32 mb-4" loading="eager">
    <p class="text-xl font-semibold text-gray-300 animate-pulse">Cargando Cortex Vitrasa...</p>
   </div>
-  <div id="app" class="h-full w-full p-4 md:p-6"><!-- Pantalla de Inicio -->
+  <div id="app" class="h-full w-full p-4 md:p-6"><!-- Modal de Autenticación -->
+   <div id="auth-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 max-w-md w-full shadow-2xl border border-white/10">
+     <h2 id="auth-modal-title" class="text-2xl font-bold mb-4 text-center">Crear Cuenta</h2>
+     <div id="auth-form">
+      <div class="mb-4"><label for="auth-username" class="block text-sm text-gray-300 mb-2">Nombre de usuario</label> <input type="text" id="auth-username" placeholder="Tu nombre..." class="w-full px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400">
+      </div>
+      <div class="mb-4"><label for="auth-password" class="block text-sm text-gray-300 mb-2">Contraseña</label> <input type="password" id="auth-password" placeholder="Crea una contraseña..." class="w-full px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400">
+      </div>
+      <div id="auth-error" class="hidden mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400 text-sm"></div><button id="auth-submit-btn" class="w-full btn-primary py-3 rounded-xl font-bold text-gray-900"> Crear Cuenta </button> <button id="auth-switch-btn" class="w-full mt-3 text-gray-400 hover:text-white transition text-sm"> ¿Ya tienes cuenta? Inicia sesión </button>
+     </div>
+    </div>
+   </div><!-- Modal de Confirmación de Eliminación -->
+   <div id="delete-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 max-w-md w-full shadow-2xl border border-white/10">
+     <h2 class="text-2xl font-bold mb-4 text-center text-red-400">⚠️ Eliminar Cuenta</h2>
+     <p class="text-gray-300 mb-6 text-center">¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.</p>
+     <div class="flex gap-3"><button id="cancel-delete-btn" class="flex-1 btn-secondary py-3 rounded-xl font-bold text-white"> Cancelar </button> <button id="confirm-delete-btn" class="flex-1 bg-red-600 hover:bg-red-700 py-3 rounded-xl font-bold text-white transition"> Eliminar </button>
+     </div>
+    </div>
+   </div><!-- Pantalla de Inicio -->
    <div id="screen-home" class="max-w-4xl mx-auto">
     <header class="text-center mb-8 fade-in">
      <div class="inline-block mb-4"><img src="https://lucasmaneirodelatm-dot.github.io/cortex/img/logo.png" alt="Logo Vitrasa" class="mx-auto h-24 w-auto" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.display='none';">
@@ -155,7 +177,7 @@
        </div>
        <div>
         <p class="text-sm text-gray-400">Jugador</p>
-        <p id="player-name-display" class="font-bold text-lg">Anónimo</p>
+        <p id="player-name-display" class="font-bold text-lg">Anónimo</p><button id="logout-btn" class="hidden text-xs text-red-400 hover:text-red-300 transition mt-1">Cerrar sesión</button>
        </div>
       </div>
       <div class="flex gap-6 text-center">
@@ -171,12 +193,11 @@
         <p class="text-2xl font-bold text-orange-400" id="stat-streak">0</p>
         <p class="text-xs text-gray-400">Mejor Racha</p>
        </div>
-      </div>
+      </div><button id="delete-account-btn" class="hidden text-xs text-gray-500 hover:text-red-400 transition"> 🗑️ Eliminar cuenta </button>
      </div>
     </div><!-- Registro de nombre -->
-    <div id="name-input-section" class="bg-white/10 backdrop-blur rounded-2xl p-4 mb-6 fade-in" style="animation-delay: 0.15s"><label for="player-name-input" class="block text-sm text-gray-300 mb-2">Tu nombre para el ranking:</label>
-     <div class="flex gap-2"><input type="text" id="player-name-input" placeholder="Escribe tu nombre..." class="flex-1 px-4 py-2 rounded-xl bg-white/20 border border-white/30 text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400"> <button id="save-name-btn" class="btn-secondary px-4 py-2 rounded-xl font-semibold text-white"> Guardar </button>
-     </div>
+    <div id="name-input-section" class="bg-white/10 backdrop-blur rounded-2xl p-4 mb-6 fade-in" style="animation-delay: 0.15s">
+     <p class="text-sm text-gray-300 mb-2 text-center">Para guardar tu progreso en el ranking</p><button id="show-auth-btn" class="w-full btn-primary py-3 rounded-xl font-bold text-gray-900"> Crear Cuenta / Iniciar Sesión </button>
     </div><!-- Modos de juego -->
     <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6"><button onclick="startChallenge('memory')" class="challenge-icon bg-white/10 backdrop-blur rounded-2xl p-4 text-center hover:bg-white/20 fade-in" style="animation-delay: 0.2s">
       <div class="text-4xl mb-2">
@@ -258,6 +279,299 @@
    </div>
   </div>
   <script>
+    // ==================== CONFIGURACIÓN DE FIREBASE ====================
+    const firebaseConfig = {
+      apiKey: "AIzaSyDqQ8vJX-_9k3ZxKp8kZYxZKxYnJZvZXYc",
+      authDomain: "cortex-vitrasa.firebaseapp.com",
+      databaseURL: "https://cortex-vitrasa-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "cortex-vitrasa",
+      storageBucket: "cortex-vitrasa.appspot.com",
+      messagingSenderId: "123456789012",
+      appId: "1:123456789012:web:abcdef1234567890"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // ==================== GESTIÓN DE AUTENTICACIÓN ====================
+    let currentUser = null;
+    let authMode = 'signup'; // 'signup' o 'login'
+
+    // Verificar sesión al cargar
+    function checkSession() {
+      const sessionData = localStorage.getItem('vitrasaSession');
+      if (sessionData) {
+        const session = JSON.parse(sessionData);
+        const now = Date.now();
+        
+        // Verificar si la sesión ha expirado (24 horas)
+        if (now - session.timestamp < 24 * 60 * 60 * 1000) {
+          currentUser = session.username;
+          updateUIForLoggedInUser();
+          return true;
+        } else {
+          localStorage.removeItem('vitrasaSession');
+        }
+      }
+      return false;
+    }
+
+    // Crear sesión local (24h)
+    function createSession(username) {
+      const sessionData = {
+        username: username,
+        timestamp: Date.now()
+      };
+      localStorage.setItem('vitrasaSession', JSON.stringify(sessionData));
+    }
+
+    // Actualizar UI cuando el usuario está logueado
+    function updateUIForLoggedInUser() {
+      const nameInputSection = document.getElementById('name-input-section');
+      const logoutBtn = document.getElementById('logout-btn');
+      const deleteBtn = document.getElementById('delete-account-btn');
+      
+      if (nameInputSection) nameInputSection.classList.add('hidden');
+      if (logoutBtn) logoutBtn.classList.remove('hidden');
+      if (deleteBtn) deleteBtn.classList.remove('hidden');
+      
+      loadUserDataFromFirebase();
+    }
+
+    // Mostrar modal de autenticación
+    function showAuthModal(mode = 'signup') {
+      authMode = mode;
+      const modal = document.getElementById('auth-modal');
+      const title = document.getElementById('auth-modal-title');
+      const submitBtn = document.getElementById('auth-submit-btn');
+      const switchBtn = document.getElementById('auth-switch-btn');
+      const usernameInput = document.getElementById('auth-username');
+      const passwordInput = document.getElementById('auth-password');
+      const errorDiv = document.getElementById('auth-error');
+      
+      if (mode === 'signup') {
+        title.textContent = 'Crear Cuenta';
+        submitBtn.textContent = 'Crear Cuenta';
+        switchBtn.textContent = '¿Ya tienes cuenta? Inicia sesión';
+        passwordInput.placeholder = 'Crea una contraseña...';
+      } else {
+        title.textContent = 'Iniciar Sesión';
+        submitBtn.textContent = 'Iniciar Sesión';
+        switchBtn.textContent = '¿No tienes cuenta? Créala';
+        passwordInput.placeholder = 'Introduce tu contraseña...';
+      }
+      
+      usernameInput.value = '';
+      passwordInput.value = '';
+      errorDiv.classList.add('hidden');
+      modal.classList.remove('hidden');
+    }
+
+    // Ocultar modal de autenticación
+    function hideAuthModal() {
+      const modal = document.getElementById('auth-modal');
+      modal.classList.add('hidden');
+    }
+
+    // Mostrar error en el modal
+    function showAuthError(message) {
+      const errorDiv = document.getElementById('auth-error');
+      errorDiv.textContent = message;
+      errorDiv.classList.remove('hidden');
+    }
+
+    // Hash simple de contraseña (en producción usar bcrypt o similar)
+    async function hashPassword(password) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Crear cuenta
+    async function signupUser(username, password) {
+      if (!username || !password) {
+        showAuthError('Por favor, completa todos los campos');
+        return;
+      }
+
+      if (username.length < 3) {
+        showAuthError('El nombre debe tener al menos 3 caracteres');
+        return;
+      }
+
+      if (password.length < 6) {
+        showAuthError('La contraseña debe tener al menos 6 caracteres');
+        return;
+      }
+
+      try {
+        // Verificar si el usuario ya existe
+        const userSnapshot = await database.ref('users/' + username).once('value');
+        if (userSnapshot.exists()) {
+          showAuthError('Este nombre de usuario ya está en uso');
+          return;
+        }
+
+        // Crear usuario en Firebase
+        const hashedPassword = await hashPassword(password);
+        await database.ref('users/' + username).set({
+          password: hashedPassword,
+          totalScore: 0,
+          gamesPlayed: 0,
+          bestStreak: 0,
+          createdAt: Date.now()
+        });
+
+        currentUser = username;
+        createSession(username);
+        hideAuthModal();
+        updateUIForLoggedInUser();
+        showToast('¡Cuenta creada exitosamente! 🎉');
+        updateLeaderboard();
+      } catch (error) {
+        console.error('Error al crear cuenta:', error);
+        showAuthError('Error al crear la cuenta. Inténtalo de nuevo.');
+      }
+    }
+
+    // Iniciar sesión
+    async function loginUser(username, password) {
+      if (!username || !password) {
+        showAuthError('Por favor, completa todos los campos');
+        return;
+      }
+
+      try {
+        const userSnapshot = await database.ref('users/' + username).once('value');
+        if (!userSnapshot.exists()) {
+          showAuthError('Usuario no encontrado');
+          return;
+        }
+
+        const userData = userSnapshot.val();
+        const hashedPassword = await hashPassword(password);
+        
+        if (userData.password !== hashedPassword) {
+          showAuthError('Contraseña incorrecta');
+          return;
+        }
+
+        currentUser = username;
+        createSession(username);
+        hideAuthModal();
+        updateUIForLoggedInUser();
+        showToast('¡Bienvenido de nuevo! 👋');
+        updateLeaderboard();
+      } catch (error) {
+        console.error('Error al iniciar sesión:', error);
+        showAuthError('Error al iniciar sesión. Inténtalo de nuevo.');
+      }
+    }
+
+    // Cerrar sesión
+    function logout() {
+      localStorage.removeItem('vitrasaSession');
+      currentUser = null;
+      
+      const nameInputSection = document.getElementById('name-input-section');
+      const logoutBtn = document.getElementById('logout-btn');
+      const deleteBtn = document.getElementById('delete-account-btn');
+      
+      if (nameInputSection) nameInputSection.classList.remove('hidden');
+      if (logoutBtn) logoutBtn.classList.add('hidden');
+      if (deleteBtn) deleteBtn.classList.add('hidden');
+      
+      updatePlayerStats();
+      showToast('Sesión cerrada');
+    }
+
+    // Mostrar modal de eliminación de cuenta
+    function showDeleteModal() {
+      const modal = document.getElementById('delete-modal');
+      modal.classList.remove('hidden');
+    }
+
+    // Ocultar modal de eliminación de cuenta
+    function hideDeleteModal() {
+      const modal = document.getElementById('delete-modal');
+      modal.classList.add('hidden');
+    }
+
+    // Eliminar cuenta (solo desde el dispositivo con sesión activa)
+    async function deleteAccount() {
+      if (!currentUser) return;
+
+      try {
+        await database.ref('users/' + currentUser).remove();
+        localStorage.removeItem('vitrasaSession');
+        currentUser = null;
+        
+        hideDeleteModal();
+        
+        const nameInputSection = document.getElementById('name-input-section');
+        const logoutBtn = document.getElementById('logout-btn');
+        const deleteBtn = document.getElementById('delete-account-btn');
+        
+        if (nameInputSection) nameInputSection.classList.remove('hidden');
+        if (logoutBtn) logoutBtn.classList.add('hidden');
+        if (deleteBtn) deleteBtn.classList.add('hidden');
+        
+        updatePlayerStats();
+        updateLeaderboard();
+        showToast('Cuenta eliminada correctamente');
+      } catch (error) {
+        console.error('Error al eliminar cuenta:', error);
+        showToast('Error al eliminar la cuenta');
+      }
+    }
+
+    // Cargar datos del usuario desde Firebase
+    async function loadUserDataFromFirebase() {
+      if (!currentUser) return;
+
+      try {
+        const userSnapshot = await database.ref('users/' + currentUser).once('value');
+        if (userSnapshot.exists()) {
+          const userData = userSnapshot.val();
+          updatePlayerStats(userData);
+        }
+      } catch (error) {
+        console.error('Error al cargar datos:', error);
+      }
+    }
+
+    // Guardar puntuación en Firebase
+    async function saveToFirebase(playerData) {
+      if (!currentUser) {
+        showToast('Crea una cuenta para guardar tu progreso');
+        return;
+      }
+
+      try {
+        const userRef = database.ref('users/' + currentUser);
+        const userSnapshot = await userRef.once('value');
+        
+        if (userSnapshot.exists()) {
+          const currentData = userSnapshot.val();
+          await userRef.update({
+            totalScore: currentData.totalScore + playerData.score,
+            gamesPlayed: currentData.gamesPlayed + 1,
+            bestStreak: Math.max(currentData.bestStreak, playerData.bestStreak),
+            lastPlayed: Date.now()
+          });
+          
+          loadUserDataFromFirebase();
+          updateLeaderboard();
+        }
+      } catch (error) {
+        console.error('Error al guardar en Firebase:', error);
+        showToast('Error al guardar los datos');
+      }
+    }
+
     // ==================== DATOS DE VITRASA 2025 ====================
     const vitrasaData = {
       lines: [
@@ -269,7 +583,7 @@
           image: 'https://lucasmaneirodelatm-dot.github.io/cortex/img/C3.png' },
         { number: 'C3i', name: 'Bouzas/Coia - Encarnación', color: '#FDD835', 
           destinations: ['Bouzas', 'Coia', 'Gran Vía', 'Encarnación', 'Torrecedeira'],
-          image: ' https://lucasmaneirodelatm-dot.github.io/cortex/img/C3_dia-sin-coches.png' },
+          image: 'https://lucasmaneirodelatm-dot.github.io/cortex/img/C3_dia-sin-coches.png' },
         { number: '5A', name: 'Navia - Trav. Vigo', color: '#1976D2', 
           destinations: ['Navia', 'Teis', 'Urzáiz'],
           image: 'https://lucasmaneirodelatm-dot.github.io/cortex/img/5A.png' },
@@ -289,9 +603,7 @@
         'https://lucasmaneirodelatm-dot.github.io/cortex/img/5A.png',
         'https://lucasmaneirodelatm-dot.github.io/cortex/img/5B.png',
         'https://lucasmaneirodelatm-dot.github.io/cortex/img/articulado_p-espana.png',
-        'https://lucasmaneirodelatm-dot.github.io/cortex/img/nueva-flota-solaris.png',
-        'https://lucasmaneirodelatm-dot.github.io/cortex/img/C3_dia-sin-coches.png',
-        'https://lucasmaneirodelatm-dot.github.io/cortex/img/15C.png'
+        'https://lucasmaneirodelatm-dot.github.io/cortex/img/nueva-flota-solaris.png'
       ],
       stops: [
         'Praza de América', 'Gran Vía', 'Urzáiz', 'Policarpo Sanz', 'Praza de España',
@@ -328,88 +640,74 @@
       isProcessing: false
     };
 
-    // ==================== GESTIÓN DE PUNTUACIONES CON LOCALSTORAGE ====================
-    function getLeaderboard() {
-      const data = localStorage.getItem('vitrasaLeaderboard');
-      return data ? JSON.parse(data) : [];
-    }
-
-    function saveToLeaderboard(playerData) {
-      let leaderboard = getLeaderboard();
-      const existingIndex = leaderboard.findIndex(p => p.name === playerData.name);
-      
-      if (existingIndex >= 0) {
-        leaderboard[existingIndex].totalScore += playerData.score;
-        leaderboard[existingIndex].gamesPlayed += 1;
-        leaderboard[existingIndex].bestStreak = Math.max(
-          leaderboard[existingIndex].bestStreak, 
-          playerData.bestStreak
-        );
-      } else {
-        leaderboard.push({
-          name: playerData.name,
-          totalScore: playerData.score,
-          gamesPlayed: 1,
-          bestStreak: playerData.bestStreak,
-          timestamp: new Date().toISOString()
-        });
-      }
-      
-      leaderboard.sort((a, b) => b.totalScore - a.totalScore);
-      localStorage.setItem('vitrasaLeaderboard', JSON.stringify(leaderboard));
-      updateLeaderboard();
-      updatePlayerStats();
-    }
-
-    function updateLeaderboard() {
+    // ==================== GESTIÓN DE PUNTUACIONES CON FIREBASE ====================
+    async function updateLeaderboard() {
       const container = document.getElementById('leaderboard');
       if (!container) return;
 
-      const leaderboard = getLeaderboard().slice(0, 10);
-      
-      if (leaderboard.length === 0) {
-        container.innerHTML = '<p class="text-gray-400 text-center py-4">Aún no hay puntuaciones. ¡Sé el primero!</p>';
-        return;
-      }
-
-      const currentPlayerName = localStorage.getItem('vitrasaPlayerName') || '';
-      
-      container.innerHTML = leaderboard.map((player, index) => {
-        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
-        const isCurrentPlayer = player.name === currentPlayerName;
+      try {
+        const usersSnapshot = await database.ref('users').once('value');
+        const usersData = usersSnapshot.val();
         
-        return `
-          <div class="leaderboard-row flex items-center justify-between p-3 rounded-xl ${isCurrentPlayer ? 'bg-yellow-500/20 border border-yellow-500/50' : 'bg-white/5'}" style="animation-delay: ${index * 0.05}s">
-            <div class="flex items-center gap-3">
-              <span class="text-xl w-8">${medal}</span>
-              <span class="font-semibold ${isCurrentPlayer ? 'text-yellow-400' : ''}">${player.name}</span>
+        if (!usersData) {
+          container.innerHTML = '<p class="text-gray-400 text-center py-4">Aún no hay puntuaciones. ¡Sé el primero!</p>';
+          return;
+        }
+
+        const leaderboard = Object.keys(usersData)
+          .map(username => ({
+            name: username,
+            totalScore: usersData[username].totalScore || 0,
+            gamesPlayed: usersData[username].gamesPlayed || 0,
+            bestStreak: usersData[username].bestStreak || 0
+          }))
+          .sort((a, b) => b.totalScore - a.totalScore)
+          .slice(0, 10);
+
+        if (leaderboard.length === 0) {
+          container.innerHTML = '<p class="text-gray-400 text-center py-4">Aún no hay puntuaciones. ¡Sé el primero!</p>';
+          return;
+        }
+        
+        container.innerHTML = leaderboard.map((player, index) => {
+          const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+          const isCurrentPlayer = player.name === currentUser;
+          
+          return `
+            <div class="leaderboard-row flex items-center justify-between p-3 rounded-xl ${isCurrentPlayer ? 'bg-yellow-500/20 border border-yellow-500/50' : 'bg-white/5'}" style="animation-delay: ${index * 0.05}s">
+              <div class="flex items-center gap-3">
+                <span class="text-xl w-8">${medal}</span>
+                <span class="font-semibold ${isCurrentPlayer ? 'text-yellow-400' : ''}">${player.name}</span>
+              </div>
+              <div class="text-right">
+                <span class="font-bold text-yellow-400">${player.totalScore}</span>
+                <span class="text-xs text-gray-400 ml-1">pts</span>
+              </div>
             </div>
-            <div class="text-right">
-              <span class="font-bold text-yellow-400">${player.totalScore}</span>
-              <span class="text-xs text-gray-400 ml-1">pts</span>
-            </div>
-          </div>
-        `;
-      }).join('');
+          `;
+        }).join('');
+      } catch (error) {
+        console.error('Error al cargar leaderboard:', error);
+        container.innerHTML = '<p class="text-gray-400 text-center py-4">Error al cargar el ranking</p>';
+      }
     }
 
-    function updatePlayerStats() {
-      const currentPlayerName = localStorage.getItem('vitrasaPlayerName') || '';
-      const leaderboard = getLeaderboard();
-      const currentPlayer = leaderboard.find(p => p.name === currentPlayerName);
-
+    function updatePlayerStats(userData = null) {
       const nameDisplay = document.getElementById('player-name-display');
       const scoreEl = document.getElementById('stat-score');
       const gamesEl = document.getElementById('stat-games');
       const streakEl = document.getElementById('stat-streak');
 
-      if (currentPlayer) {
-        if (nameDisplay) nameDisplay.textContent = currentPlayer.name;
-        if (scoreEl) scoreEl.textContent = currentPlayer.totalScore;
-        if (gamesEl) gamesEl.textContent = currentPlayer.gamesPlayed;
-        if (streakEl) streakEl.textContent = currentPlayer.bestStreak;
+      if (currentUser && userData) {
+        if (nameDisplay) nameDisplay.textContent = currentUser;
+        if (scoreEl) scoreEl.textContent = userData.totalScore || 0;
+        if (gamesEl) gamesEl.textContent = userData.gamesPlayed || 0;
+        if (streakEl) streakEl.textContent = userData.bestStreak || 0;
+      } else if (currentUser) {
+        if (nameDisplay) nameDisplay.textContent = currentUser;
+        loadUserDataFromFirebase();
       } else {
-        if (nameDisplay) nameDisplay.textContent = currentPlayerName || 'Anónimo';
+        if (nameDisplay) nameDisplay.textContent = 'Anónimo';
         if (scoreEl) scoreEl.textContent = '0';
         if (gamesEl) gamesEl.textContent = '0';
         if (streakEl) streakEl.textContent = '0';
@@ -417,42 +715,7 @@
     }
 
     // ==================== GESTIÓN DE NOMBRE ====================
-    document.addEventListener('DOMContentLoaded', () => {
-      // Ocultar loader después de 2 segundos
-      setTimeout(() => {
-        const loader = document.getElementById('screen-loader');
-        if (loader) {
-          loader.style.opacity = '0';
-          loader.style.transition = 'opacity 0.5s ease';
-          setTimeout(() => loader.remove(), 500);
-        }
-      }, 2000);
-
-      const saveBtn = document.getElementById('save-name-btn');
-      const nameInput = document.getElementById('player-name-input');
-      
-      const savedName = localStorage.getItem('vitrasaPlayerName');
-      if (savedName && nameInput) {
-        nameInput.value = savedName;
-      }
-
-      if (saveBtn) {
-        saveBtn.addEventListener('click', () => {
-          const name = nameInput?.value?.trim();
-          if (!name) {
-            showToast('Por favor, escribe tu nombre');
-            return;
-          }
-          
-          localStorage.setItem('vitrasaPlayerName', name);
-          updatePlayerStats();
-          showToast('¡Nombre guardado!');
-        });
-      }
-
-      updateLeaderboard();
-      updatePlayerStats();
-    });
+    // Ya no se usa - autenticación con Firebase
 
     // ==================== NAVEGACIÓN ====================
     function showScreen(screenId) {
@@ -584,7 +847,7 @@
         title: '🎴 Memoria de Rutas',
         instruction: 'Encuentra las parejas: línea con su destino principal',
         cards: shuffleArray(pairs),
-        timeLimit: 70
+        timeLimit: 45
       };
     }
 
@@ -694,7 +957,7 @@
         lineColor: line.color,
         stops: shuffledStops,
         correctOrder: correctOrder,
-        timeLimit: 30
+        timeLimit: 25
       };
     }
 
@@ -1261,11 +1524,9 @@
       }
       document.getElementById('result-message').textContent = message;
 
-      // Guardar puntuación en localStorage
-      const playerName = localStorage.getItem('vitrasaPlayerName') || 'Anónimo';
-      if (playerName !== 'Anónimo') {
-        saveToLeaderboard({
-          name: playerName,
+      // Guardar puntuación en Firebase
+      if (currentUser) {
+        saveToFirebase({
           score: gameState.score,
           bestStreak: gameState.bestStreak
         });
@@ -1307,6 +1568,85 @@
       const colors = ['#e53935', '#1e88e5', '#43a047', '#fb8c00', '#8e24aa', '#00acc1', '#d81b60', '#5e35b1', '#00897b', '#c0ca33', '#6d4c41', '#546e7a'];
       return shuffleArray(colors.filter(c => c !== exclude)).slice(0, count);
     }
+
+    // ==================== INICIALIZACIÓN ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      // Ocultar loader después de 2 segundos
+      setTimeout(() => {
+        const loader = document.getElementById('screen-loader');
+        if (loader) {
+          loader.style.opacity = '0';
+          loader.style.transition = 'opacity 0.5s ease';
+          setTimeout(() => loader.remove(), 500);
+        }
+      }, 2000);
+
+      // Verificar sesión existente
+      checkSession();
+      
+      // Cargar leaderboard inicial
+      updateLeaderboard();
+      updatePlayerStats();
+
+      // Event listeners para autenticación
+      const showAuthBtn = document.getElementById('show-auth-btn');
+      const authSubmitBtn = document.getElementById('auth-submit-btn');
+      const authSwitchBtn = document.getElementById('auth-switch-btn');
+      const logoutBtn = document.getElementById('logout-btn');
+      const deleteAccountBtn = document.getElementById('delete-account-btn');
+      const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+      const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+
+      if (showAuthBtn) {
+        showAuthBtn.addEventListener('click', () => showAuthModal('signup'));
+      }
+
+      if (authSubmitBtn) {
+        authSubmitBtn.addEventListener('click', async () => {
+          const username = document.getElementById('auth-username').value.trim();
+          const password = document.getElementById('auth-password').value;
+          
+          if (authMode === 'signup') {
+            await signupUser(username, password);
+          } else {
+            await loginUser(username, password);
+          }
+        });
+      }
+
+      if (authSwitchBtn) {
+        authSwitchBtn.addEventListener('click', () => {
+          const newMode = authMode === 'signup' ? 'login' : 'signup';
+          showAuthModal(newMode);
+        });
+      }
+
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+      }
+
+      if (deleteAccountBtn) {
+        deleteAccountBtn.addEventListener('click', showDeleteModal);
+      }
+
+      if (cancelDeleteBtn) {
+        cancelDeleteBtn.addEventListener('click', hideDeleteModal);
+      }
+
+      if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', deleteAccount);
+      }
+
+      // Permitir Enter en los campos de autenticación
+      const authPassword = document.getElementById('auth-password');
+      if (authPassword) {
+        authPassword.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            authSubmitBtn.click();
+          }
+        });
+      }
+    });
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c62eec106e1a431',t:'MTc2OTc5NjY5NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c7b5692e086d929',t:'MTc3MDA1MjYwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
