@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="es" class="h-full">
  <head>
@@ -5,103 +6,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cortex Vitrasa</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
   <style>
     body {
       box-sizing: border-box;
     }
     * {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Outfit', sans-serif;
     }
-    .title-font {
-      font-family: 'Orbitron', sans-serif;
+    .bus-pattern {
+      background-image: 
+        radial-gradient(circle at 20% 80%, rgba(255,193,7,0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(0,150,136,0.1) 0%, transparent 50%),
+        linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
     }
-    .game-bg {
-      background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #2d1b4e 100%);
-      position: relative;
-      overflow: hidden;
+    .card-glow {
+      box-shadow: 0 0 30px rgba(255,193,7,0.2), 0 10px 40px rgba(0,0,0,0.3);
     }
-    .game-bg::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: 
-        radial-gradient(circle at 20% 80%, rgba(138, 43, 226, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.1) 0%, transparent 50%);
-      pointer-events: none;
-    }
-    .neon-card {
-      background: rgba(26, 31, 58, 0.7);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(138, 43, 226, 0.3);
-      box-shadow: 0 8px 32px rgba(138, 43, 226, 0.2);
+    .btn-primary {
+      background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
       transition: all 0.3s ease;
     }
-    .neon-card:hover {
-      border-color: rgba(138, 43, 226, 0.6);
-      box-shadow: 0 8px 32px rgba(138, 43, 226, 0.4);
+    .btn-primary:hover {
       transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(255,193,7,0.4);
     }
-    .neon-btn {
-      background: linear-gradient(135deg, #8a2be2 0%, #9d4edd 100%);
-      box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+    .btn-secondary {
+      background: linear-gradient(135deg, #009688 0%, #00796b 100%);
       transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
     }
-    .neon-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-      transition: left 0.5s;
-    }
-    .neon-btn:hover::before {
-      left: 100%;
-    }
-    .neon-btn:hover {
+    .btn-secondary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(138, 43, 226, 0.6);
+      box-shadow: 0 5px 20px rgba(0,150,136,0.4);
     }
-    .gold-btn {
-      background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
-      color: #0a0e27;
-    }
-    .gold-btn:hover {
-      box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
-    }
-    .challenge-card {
-      background: linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(240,240,240,0.95) 100%);
-      border-left: 4px solid #8a2be2;
+    .bus-card {
+      background: linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%);
+      border-left: 5px solid #ffc107;
       transition: all 0.3s ease;
-      cursor: pointer;
     }
-    .challenge-card:hover {
-      transform: scale(1.05);
-      box-shadow: 0 10px 30px rgba(138, 43, 226, 0.3);
+    .bus-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
-    .challenge-card.selected {
-      border-left-color: #ffd700;
-      background: linear-gradient(145deg, #fff9e6 0%, #fff3cc 100%);
+    .bus-card.selected {
+      border-left-color: #009688;
+      background: linear-gradient(145deg, #e0f2f1 0%, #b2dfdb 100%);
     }
-    .challenge-card.correct {
-      border-left-color: #10b981;
-      background: linear-gradient(145deg, #d1fae5 0%, #a7f3d0 100%);
-      animation: pulse-success 0.5s ease;
+    .bus-card.correct {
+      border-left-color: #4caf50;
+      background: linear-gradient(145deg, #c8e6c9 0%, #a5d6a7 100%);
+      animation: pulse-green 0.5s ease;
     }
-    .challenge-card.incorrect {
-      border-left-color: #ef4444;
-      background: linear-gradient(145deg, #fee2e2 0%, #fecaca 100%);
+    .bus-card.incorrect {
+      border-left-color: #f44336;
+      background: linear-gradient(145deg, #ffcdd2 0%, #ef9a9a 100%);
       animation: shake 0.5s ease;
     }
-    @keyframes pulse-success {
+    @keyframes pulse-green {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.05); }
     }
@@ -110,25 +71,21 @@
       25% { transform: translateX(-10px); }
       75% { transform: translateX(10px); }
     }
-    .fade-in {
-      animation: fadeIn 0.6s ease forwards;
-    }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
     .timer-bar {
       transition: width 0.1s linear;
-      background: linear-gradient(90deg, #10b981 0%, #ffd700 50%, #ef4444 100%);
     }
     .memory-card {
       perspective: 1000px;
       cursor: pointer;
     }
     .memory-card-inner {
-      position: relative;
-      width: 100%;
-      height: 100%;
       transition: transform 0.6s;
       transform-style: preserve-3d;
     }
@@ -136,636 +93,173 @@
       transform: rotateY(180deg);
     }
     .memory-card-front, .memory-card-back {
+      backface-visibility: hidden;
       position: absolute;
       width: 100%;
       height: 100%;
-      backface-visibility: hidden;
       border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .memory-card-front {
-      background: linear-gradient(135deg, #8a2be2 0%, #9d4edd 100%);
     }
     .memory-card-back {
-      background: white;
       transform: rotateY(180deg);
     }
-    .memory-card.matched .memory-card-inner {
-      opacity: 0.6;
+    .route-line {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      animation: drawLine 2s ease forwards;
+    }
+    @keyframes drawLine {
+      to { stroke-dashoffset: 0; }
     }
     .leaderboard-row {
-      animation: slideIn 0.4s ease forwards;
+      animation: slideIn 0.3s ease forwards;
       opacity: 0;
     }
     @keyframes slideIn {
-      from { opacity: 0; transform: translateX(-30px); }
+      from { opacity: 0; transform: translateX(-20px); }
       to { opacity: 1; transform: translateX(0); }
     }
-    .stat-badge {
-      background: linear-gradient(135deg, rgba(138, 43, 226, 0.2) 0%, rgba(157, 78, 221, 0.2) 100%);
-      border: 1px solid rgba(138, 43, 226, 0.4);
+    .challenge-icon {
+      transition: all 0.3s ease;
     }
-    .toast {
-      position: fixed;
-      bottom: 2rem;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(10, 14, 39, 0.95);
-      backdrop-filter: blur(10px);
-      padding: 1rem 2rem;
-      border-radius: 9999px;
-      box-shadow: 0 8px 32px rgba(138, 43, 226, 0.4);
-      border: 1px solid rgba(138, 43, 226, 0.5);
-      z-index: 1000;
-      animation: slideUp 0.3s ease;
+    .challenge-icon:hover {
+      transform: scale(1.1) rotate(5deg);
     }
-    @keyframes slideUp {
-      from { opacity: 0; transform: translate(-50%, 20px); }
-      to { opacity: 1; transform: translate(-50%, 0); }
+    .streak-fire {
+      animation: fireGlow 0.5s ease infinite alternate;
+    }
+    @keyframes fireGlow {
+      from { text-shadow: 0 0 10px #ff9800, 0 0 20px #ff5722; }
+      to { text-shadow: 0 0 20px #ff9800, 0 0 40px #ff5722; }
     }
   </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
   <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
  </head>
- <body class="h-full game-bg text-white overflow-auto"><!-- Modal de Autenticación -->
-  <div id="auth-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-   <div class="neon-card rounded-3xl p-8 max-w-md w-full">
-    <h2 id="auth-modal-title" class="text-3xl font-bold mb-6 text-center title-font">Crear Cuenta</h2>
-    <div id="auth-form">
-     <div class="mb-5"><label for="auth-username" class="block text-sm text-gray-300 mb-2 font-medium">Nombre de usuario</label> <input type="text" id="auth-username" placeholder="Elige tu nombre..." class="w-full px-4 py-3 rounded-xl bg-white/10 border border-purple-500/30 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition">
-     </div>
-     <div class="mb-5"><label for="auth-password" class="block text-sm text-gray-300 mb-2 font-medium">Contraseña</label> <input type="password" id="auth-password" placeholder="Crea una contraseña segura..." class="w-full px-4 py-3 rounded-xl bg-white/10 border border-purple-500/30 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 transition">
-     </div>
-     <div id="auth-error" class="hidden mb-4 p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-300 text-sm"></div><button id="auth-submit-btn" class="w-full neon-btn py-4 rounded-xl font-bold text-white text-lg mb-3"> Crear Cuenta </button> <button id="auth-switch-btn" class="w-full text-gray-400 hover:text-purple-400 transition text-sm"> ¿Ya tienes cuenta? Inicia sesión </button>
-    </div>
-   </div>
-  </div><!-- Modal de Confirmación de Eliminación -->
-  <div id="delete-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-   <div class="neon-card rounded-3xl p-8 max-w-md w-full">
-    <h2 class="text-3xl font-bold mb-4 text-center text-red-400 title-font">⚠️ Eliminar Cuenta</h2>
-    <p class="text-gray-300 mb-6 text-center">¿Estás seguro? Perderás todo tu progreso y puntuación.</p>
-    <div class="flex gap-4"><button id="cancel-delete-btn" class="flex-1 bg-gray-600 hover:bg-gray-700 py-3 rounded-xl font-bold text-white transition"> Cancelar </button> <button id="confirm-delete-btn" class="flex-1 bg-red-600 hover:bg-red-700 py-3 rounded-xl font-bold text-white transition"> Eliminar </button>
-    </div>
-   </div>
+ <body class="h-full bus-pattern text-white overflow-auto"><!-- Pantalla de Carga -->
+  <div id="screen-loader" class="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col items-center justify-center z-50"><img src="https://lucasmaneirodelatm-dot.github.io/cortex/img/Loader.gif" alt="Cargando..." class="w-32 h-32 mb-4" loading="eager">
+   <p class="text-xl font-semibold text-gray-300 animate-pulse">Cargando Cortex Vitrasa...</p>
   </div>
-  <div id="app" class="h-full w-full p-4 md:p-8"><!-- Pantalla de Inicio -->
-   <div id="screen-home" class="max-w-5xl mx-auto">
-    <header class="text-center mb-10 fade-in">
-     <h1 class="text-5xl md:text-7xl font-black mb-3 title-font bg-gradient-to-r from-purple-400 via-pink-400 to-yellow-400 bg-clip-text text-transparent">CORTEX VITRASA</h1>
-     <p class="text-xl text-gray-300">🧠 Pon a prueba tu mente con los buses de Vigo</p>
+  <div id="app" class="h-full w-full p-4 md:p-6"><!-- Pantalla de Inicio -->
+   <div id="screen-home" class="max-w-4xl mx-auto">
+    <header class="text-center mb-8 fade-in">
+     <div class="inline-block mb-4"><img src="https://lucasmaneirodelatm-dot.github.io/cortex/img/logo.png" alt="Logo Vitrasa" class="mx-auto h-24 w-auto" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.display='none';">
+     </div>
+     <h1 id="main-title" class="text-4xl md:text-5xl font-extrabold mb-2 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">Cortex Vitrasa</h1>
+     <p id="welcome-text" class="text-lg text-gray-300">¡Pon a prueba tu mente con los buses de Vigo!</p>
     </header><!-- Stats del jugador -->
-    <div id="player-stats" class="neon-card rounded-2xl p-6 mb-8 fade-in" style="animation-delay: 0.1s">
+    <div id="player-stats" class="bg-white/10 backdrop-blur rounded-2xl p-4 mb-6 fade-in" style="animation-delay: 0.1s">
      <div class="flex items-center justify-between flex-wrap gap-4">
-      <div class="flex items-center gap-4">
-       <div class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-3xl">
+      <div class="flex items-center gap-3">
+       <div class="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-2xl">
         🧠
        </div>
        <div>
         <p class="text-sm text-gray-400">Jugador</p>
-        <p id="player-name-display" class="font-bold text-2xl">Anónimo</p><button id="logout-btn" class="hidden text-xs text-red-400 hover:text-red-300 transition mt-1">Cerrar sesión</button>
+        <p id="player-name-display" class="font-bold text-lg">Anónimo</p>
        </div>
       </div>
-      <div class="flex gap-6">
-       <div class="stat-badge px-4 py-3 rounded-xl text-center">
-        <p class="text-3xl font-bold text-yellow-400" id="stat-score">0</p>
+      <div class="flex gap-6 text-center">
+       <div>
+        <p class="text-2xl font-bold text-yellow-400" id="stat-score">0</p>
         <p class="text-xs text-gray-400">Puntos</p>
        </div>
-       <div class="stat-badge px-4 py-3 rounded-xl text-center">
-        <p class="text-3xl font-bold text-purple-400" id="stat-games">0</p>
+       <div>
+        <p class="text-2xl font-bold text-teal-400" id="stat-games">0</p>
         <p class="text-xs text-gray-400">Partidas</p>
        </div>
-       <div class="stat-badge px-4 py-3 rounded-xl text-center">
-        <p class="text-3xl font-bold text-pink-400" id="stat-streak">0</p>
-        <p class="text-xs text-gray-400">Racha</p>
+       <div>
+        <p class="text-2xl font-bold text-orange-400" id="stat-streak">0</p>
+        <p class="text-xs text-gray-400">Mejor Racha</p>
        </div>
-      </div><button id="delete-account-btn" class="hidden text-xs text-gray-500 hover:text-red-400 transition"> 🗑️ Eliminar cuenta </button>
+      </div>
      </div>
     </div><!-- Registro de nombre -->
-    <div id="name-input-section" class="neon-card rounded-2xl p-6 mb-8 text-center fade-in" style="animation-delay: 0.15s">
-     <p class="text-gray-300 mb-4">💾 Guarda tu progreso y compite en el ranking global</p><button id="show-auth-btn" class="neon-btn px-8 py-3 rounded-xl font-bold text-white text-lg"> Crear Cuenta / Iniciar Sesión </button>
+    <div id="name-input-section" class="bg-white/10 backdrop-blur rounded-2xl p-4 mb-6 fade-in" style="animation-delay: 0.15s"><label for="player-name-input" class="block text-sm text-gray-300 mb-2">Tu nombre para el ranking:</label>
+     <div class="flex gap-2"><input type="text" id="player-name-input" placeholder="Escribe tu nombre..." class="flex-1 px-4 py-2 rounded-xl bg-white/20 border border-white/30 text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400"> <button id="save-name-btn" class="btn-secondary px-4 py-2 rounded-xl font-semibold text-white"> Guardar </button>
+     </div>
     </div><!-- Modos de juego -->
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8"><button onclick="startChallenge('memory')" class="neon-card rounded-2xl p-6 text-center hover:scale-105 transition fade-in" style="animation-delay: 0.2s">
-      <div class="text-5xl mb-3">
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6"><button onclick="startChallenge('memory')" class="challenge-icon bg-white/10 backdrop-blur rounded-2xl p-4 text-center hover:bg-white/20 fade-in" style="animation-delay: 0.2s">
+      <div class="text-4xl mb-2">
        🎴
-      </div><h3 class="font-bold text-lg">Memoria</h3><p class="text-xs text-gray-400 mt-1">Parejas de líneas</p></button> <button onclick="startChallenge('calculation')" class="neon-card rounded-2xl p-6 text-center hover:scale-105 transition fade-in" style="animation-delay: 0.25s">
-      <div class="text-5xl mb-3">
+      </div><h3 class="font-bold text-sm">Memoria</h3><p class="text-xs text-gray-400">Recuerda las rutas</p></button> <button onclick="startChallenge('calculation')" class="challenge-icon bg-white/10 backdrop-blur rounded-2xl p-4 text-center hover:bg-white/20 fade-in" style="animation-delay: 0.25s">
+      <div class="text-4xl mb-2">
        🔢
-      </div><h3 class="font-bold text-lg">Cálculo</h3><p class="text-xs text-gray-400 mt-1">Tarifas y cambio</p></button> <button onclick="startChallenge('routes')" class="neon-card rounded-2xl p-6 text-center hover:scale-105 transition fade-in" style="animation-delay: 0.3s">
-      <div class="text-5xl mb-3">
+      </div><h3 class="font-bold text-sm">Cálculo</h3><p class="text-xs text-gray-400">Billetes y cambio</p></button> <button onclick="startChallenge('routes')" class="challenge-icon bg-white/10 backdrop-blur rounded-2xl p-4 text-center hover:bg-white/20 fade-in" style="animation-delay: 0.3s">
+      <div class="text-4xl mb-2">
        🗺️
-      </div><h3 class="font-bold text-lg">Rutas</h3><p class="text-xs text-gray-400 mt-1">Destinos correctos</p></button> <button onclick="startChallenge('sequence')" class="neon-card rounded-2xl p-6 text-center hover:scale-105 transition fade-in" style="animation-delay: 0.35s">
-      <div class="text-5xl mb-3">
+      </div><h3 class="font-bold text-sm">Rutas</h3><p class="text-xs text-gray-400">¿Qué línea va?</p></button> <button onclick="startChallenge('sequence')" class="challenge-icon bg-white/10 backdrop-blur rounded-2xl p-4 text-center hover:bg-white/20 fade-in" style="animation-delay: 0.35s">
+      <div class="text-4xl mb-2">
        🔄
-      </div><h3 class="font-bold text-lg">Secuencia</h3><p class="text-xs text-gray-400 mt-1">Orden de paradas</p></button> <button onclick="startChallenge('speed')" class="neon-card rounded-2xl p-6 text-center hover:scale-105 transition fade-in" style="animation-delay: 0.4s">
-      <div class="text-5xl mb-3">
+      </div><h3 class="font-bold text-sm">Secuencia</h3><p class="text-xs text-gray-400">Orden de paradas</p></button> <button onclick="startChallenge('speed')" class="challenge-icon bg-white/10 backdrop-blur rounded-2xl p-4 text-center hover:bg-white/20 fade-in" style="animation-delay: 0.4s">
+      <div class="text-4xl mb-2">
        ⚡
-      </div><h3 class="font-bold text-lg">Velocidad</h3><p class="text-xs text-gray-400 mt-1">Respuesta rápida</p></button> <button onclick="startChallenge('pairs')" class="neon-card rounded-2xl p-6 text-center hover:scale-105 transition fade-in" style="animation-delay: 0.45s">
-      <div class="text-5xl mb-3">
+      </div><h3 class="font-bold text-sm">Velocidad</h3><p class="text-xs text-gray-400">Respuesta rápida</p></button> <button onclick="startChallenge('pairs')" class="challenge-icon bg-white/10 backdrop-blur rounded-2xl p-4 text-center hover:bg-white/20 fade-in" style="animation-delay: 0.45s">
+      <div class="text-4xl mb-2">
        👯
-      </div><h3 class="font-bold text-lg">Parejas</h3><p class="text-xs text-gray-400 mt-1">Une correctamente</p></button>
-    </div><!-- Botón de juego mixto --> <button onclick="startMixedGame()" class="w-full gold-btn py-6 rounded-2xl font-bold text-2xl mb-8 fade-in" style="animation-delay: 0.5s"> 🎮 JUEGO COMPLETO - 10 Rondas </button> <!-- Leaderboard -->
-    <div class="neon-card rounded-2xl p-6 fade-in" style="animation-delay: 0.55s">
-     <h2 class="text-2xl font-bold mb-6 flex items-center gap-3 title-font"><span class="text-3xl">🏆</span> Ranking Global</h2>
+      </div><h3 class="font-bold text-sm">Parejas</h3><p class="text-xs text-gray-400">Une línea y destino</p></button>
+    </div><!-- Botón de juego mixto --> <button onclick="startMixedGame()" class="w-full btn-primary py-4 rounded-2xl font-bold text-xl text-gray-900 mb-6 fade-in" style="animation-delay: 0.5s"> 🎮 JUEGO MIXTO - 10 Rondas </button> <!-- Leaderboard -->
+    <div class="bg-white/10 backdrop-blur rounded-2xl p-4 fade-in" style="animation-delay: 0.55s">
+     <h2 class="text-xl font-bold mb-4 flex items-center gap-2">🏆 Ranking de Viajeros</h2>
      <div id="leaderboard" class="space-y-2">
-      <p class="text-gray-400 text-center py-8">Cargando ranking...</p>
+      <p class="text-gray-400 text-center py-4">Aún no hay puntuaciones. ¡Sé el primero!</p>
      </div>
     </div>
    </div><!-- Pantalla de Juego -->
-   <div id="screen-game" class="max-w-5xl mx-auto hidden"><!-- Header del juego -->
-    <div class="flex items-center justify-between mb-6"><button onclick="exitGame()" class="flex items-center gap-2 text-gray-300 hover:text-white transition neon-card px-4 py-2 rounded-xl">
+   <div id="screen-game" class="max-w-4xl mx-auto hidden"><!-- Header del juego -->
+    <div class="flex items-center justify-between mb-4"><button onclick="exitGame()" class="flex items-center gap-2 text-gray-400 hover:text-white transition">
       <svg width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7" />
       </svg> Salir </button>
      <div class="flex items-center gap-4">
-      <div class="stat-badge px-4 py-2 rounded-xl flex items-center gap-2"><span id="current-streak" class="text-3xl font-bold text-orange-400">0</span> <span class="text-2xl">🔥</span>
+      <div class="flex items-center gap-1"><span id="current-streak" class="text-2xl font-bold text-orange-400">0</span> <span class="text-xl">🔥</span>
       </div>
-      <div class="stat-badge px-4 py-2 rounded-xl"><span class="text-sm text-gray-400">Ronda</span> <span id="round-display" class="font-bold ml-2 text-lg">1/10</span>
+      <div class="bg-white/20 rounded-full px-4 py-1"><span class="text-sm text-gray-300">Ronda</span> <span id="round-display" class="font-bold ml-1">1/10</span>
       </div>
      </div>
-     <div class="stat-badge px-4 py-2 rounded-xl text-right">
-      <p class="text-3xl font-bold text-yellow-400" id="game-score">0</p>
+     <div class="text-right">
+      <p class="text-2xl font-bold text-yellow-400" id="game-score">0</p>
       <p class="text-xs text-gray-400">puntos</p>
      </div>
     </div><!-- Barra de tiempo -->
-    <div class="w-full h-3 bg-white/10 rounded-full mb-8 overflow-hidden">
-     <div id="timer-bar" class="timer-bar h-full rounded-full" style="width: 100%"></div>
+    <div class="w-full h-2 bg-white/20 rounded-full mb-6 overflow-hidden">
+     <div id="timer-bar" class="timer-bar h-full bg-gradient-to-r from-green-400 via-yellow-400 to-red-500 rounded-full" style="width: 100%"></div>
     </div><!-- Área del desafío -->
-    <div id="challenge-area" class="neon-card rounded-2xl p-8 min-h-[500px]"><!-- Contenido dinámico -->
+    <div id="challenge-area" class="bg-white/10 backdrop-blur rounded-2xl p-6 min-h-[400px]"><!-- El contenido del desafío se genera dinámicamente -->
     </div>
    </div><!-- Pantalla de Resultados -->
    <div id="screen-results" class="max-w-4xl mx-auto hidden">
-    <div class="text-center py-12 fade-in">
-     <div class="text-8xl mb-6">
+    <div class="text-center py-8 fade-in">
+     <div class="text-6xl mb-4">
       🎉
      </div>
-     <h2 class="text-5xl font-black mb-4 title-font">¡Partida Terminada!</h2>
-     <p class="text-xl text-gray-300 mb-10">Aquí están tus resultados</p>
-     <div class="neon-card rounded-2xl p-8 mb-8">
-      <div class="grid grid-cols-3 gap-6 mb-8">
+     <h2 class="text-3xl font-bold mb-2">¡Partida Terminada!</h2>
+     <p class="text-gray-300 mb-6">Has completado todos los desafíos</p>
+     <div class="bg-white/10 backdrop-blur rounded-2xl p-6 mb-6">
+      <div class="grid grid-cols-3 gap-4 mb-6">
        <div class="text-center">
-        <p class="text-5xl font-bold text-yellow-400 mb-2" id="result-score">0</p>
-        <p class="text-sm text-gray-400">Puntos Totales</p>
+        <p class="text-4xl font-bold text-yellow-400" id="result-score">0</p>
+        <p class="text-sm text-gray-400">Puntos</p>
        </div>
        <div class="text-center">
-        <p class="text-5xl font-bold text-green-400 mb-2" id="result-correct">0</p>
-        <p class="text-sm text-gray-400">Respuestas Correctas</p>
+        <p class="text-4xl font-bold text-green-400" id="result-correct">0</p>
+        <p class="text-sm text-gray-400">Aciertos</p>
        </div>
        <div class="text-center">
-        <p class="text-5xl font-bold text-orange-400 mb-2" id="result-streak">0</p>
+        <p class="text-4xl font-bold text-orange-400" id="result-streak">0</p>
         <p class="text-sm text-gray-400">Mejor Racha</p>
        </div>
       </div>
-      <div id="result-message" class="text-2xl font-bold text-purple-400 mb-6">
-       ¡Excelente trabajo!
+      <div id="result-message" class="text-lg font-semibold text-teal-400 mb-4">
+       ¡Buen trabajo!
       </div>
      </div>
-     <div class="flex gap-4 justify-center"><button onclick="startMixedGame()" class="neon-btn px-10 py-4 rounded-xl font-bold text-white text-lg"> 🔄 Jugar de Nuevo </button> <button onclick="showHome()" class="gold-btn px-10 py-4 rounded-xl font-bold text-lg"> 🏠 Inicio </button>
+     <div class="flex gap-4 justify-center"><button onclick="startMixedGame()" class="btn-primary px-8 py-3 rounded-xl font-bold text-gray-900"> 🔄 Jugar de Nuevo </button> <button onclick="showHome()" class="btn-secondary px-8 py-3 rounded-xl font-bold text-white"> 🏠 Inicio </button>
      </div>
     </div>
    </div>
   </div>
   <script>
-    // ==================== SISTEMA DE ALMACENAMIENTO LOCAL ROBUSTO ====================
-    
-    const STORAGE_KEYS = {
-      USERS: 'cortex_vitrasa_users_v2',
-      SESSION: 'cortex_vitrasa_session_v2'
-    };
-
-    // Gestión segura de localStorage
-    function getLocalStorage(key, defaultValue = null) {
-      try {
-        const data = localStorage.getItem(key);
-        return data ? JSON.parse(data) : defaultValue;
-      } catch (error) {
-        console.error('Error al leer localStorage:', error);
-        return defaultValue;
-      }
-    }
-
-    function setLocalStorage(key, value) {
-      try {
-        localStorage.setItem(key, JSON.stringify(value));
-        return true;
-      } catch (error) {
-        console.error('Error al guardar en localStorage:', error);
-        return false;
-      }
-    }
-
-    // Hash de contraseña simple pero efectivo
-    async function hashPassword(password) {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(password + 'cortex_salt_2025');
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
-    // Base de datos de usuarios local
-    class UserDatabase {
-      constructor() {
-        this.users = getLocalStorage(STORAGE_KEYS.USERS, {});
-      }
-
-      save() {
-        return setLocalStorage(STORAGE_KEYS.USERS, this.users);
-      }
-
-      userExists(username) {
-        return username in this.users;
-      }
-
-      async createUser(username, password) {
-        if (this.userExists(username)) {
-          throw new Error('DUPLICATE_USER');
-        }
-
-        const hashedPassword = await hashPassword(password);
-        this.users[username] = {
-          username: username,
-          password: hashedPassword,
-          totalScore: 0,
-          gamesPlayed: 0,
-          bestStreak: 0,
-          createdAt: new Date().toISOString(),
-          lastPlayed: new Date().toISOString()
-        };
-
-        this.save();
-        return this.users[username];
-      }
-
-      async validateUser(username, password) {
-        if (!this.userExists(username)) {
-          return null;
-        }
-
-        const hashedPassword = await hashPassword(password);
-        const user = this.users[username];
-
-        if (user.password === hashedPassword) {
-          return user;
-        }
-
-        return null;
-      }
-
-      getUser(username) {
-        return this.users[username] || null;
-      }
-
-      updateUser(username, updates) {
-        if (!this.userExists(username)) {
-          return false;
-        }
-
-        this.users[username] = {
-          ...this.users[username],
-          ...updates,
-          lastPlayed: new Date().toISOString()
-        };
-
-        return this.save();
-      }
-
-      deleteUser(username) {
-        if (!this.userExists(username)) {
-          return false;
-        }
-
-        delete this.users[username];
-        return this.save();
-      }
-
-      getLeaderboard(limit = 10) {
-        return Object.values(this.users)
-          .sort((a, b) => b.totalScore - a.totalScore)
-          .slice(0, limit);
-      }
-    }
-
-    const userDB = new UserDatabase();
-
-    // ==================== GESTIÓN DE SESIÓN ====================
-    
-    let currentUser = null;
-    let authMode = 'signup';
-
-    function checkSession() {
-      const sessionData = getLocalStorage(STORAGE_KEYS.SESSION);
-      if (sessionData) {
-        const now = Date.now();
-        // Sesión válida por 30 días
-        if (now - sessionData.timestamp < 30 * 24 * 60 * 60 * 1000) {
-          if (userDB.userExists(sessionData.username)) {
-            currentUser = sessionData.username;
-            updateUIForLoggedInUser();
-            return true;
-          }
-        }
-        localStorage.removeItem(STORAGE_KEYS.SESSION);
-      }
-      return false;
-    }
-
-    function createSession(username) {
-      const sessionData = {
-        username: username,
-        timestamp: Date.now()
-      };
-      setLocalStorage(STORAGE_KEYS.SESSION, sessionData);
-    }
-
-    function destroySession() {
-      localStorage.removeItem(STORAGE_KEYS.SESSION);
-      currentUser = null;
-    }
-
-    // ==================== UI DE AUTENTICACIÓN ====================
-
-    function updateUIForLoggedInUser() {
-      const nameInputSection = document.getElementById('name-input-section');
-      const logoutBtn = document.getElementById('logout-btn');
-      const deleteBtn = document.getElementById('delete-account-btn');
-      
-      if (nameInputSection) nameInputSection.classList.add('hidden');
-      if (logoutBtn) logoutBtn.classList.remove('hidden');
-      if (deleteBtn) deleteBtn.classList.remove('hidden');
-      
-      loadUserData();
-    }
-
-    function showAuthModal(mode = 'signup') {
-      authMode = mode;
-      const modal = document.getElementById('auth-modal');
-      const title = document.getElementById('auth-modal-title');
-      const submitBtn = document.getElementById('auth-submit-btn');
-      const switchBtn = document.getElementById('auth-switch-btn');
-      const usernameInput = document.getElementById('auth-username');
-      const passwordInput = document.getElementById('auth-password');
-      const errorDiv = document.getElementById('auth-error');
-      
-      if (mode === 'signup') {
-        title.textContent = 'Crear Cuenta';
-        submitBtn.textContent = 'Crear Cuenta';
-        switchBtn.textContent = '¿Ya tienes cuenta? Inicia sesión';
-        passwordInput.placeholder = 'Crea una contraseña segura...';
-      } else {
-        title.textContent = 'Iniciar Sesión';
-        submitBtn.textContent = 'Iniciar Sesión';
-        switchBtn.textContent = '¿No tienes cuenta? Créala';
-        passwordInput.placeholder = 'Introduce tu contraseña...';
-      }
-      
-      usernameInput.value = '';
-      passwordInput.value = '';
-      errorDiv.classList.add('hidden');
-      modal.classList.remove('hidden');
-    }
-
-    function hideAuthModal() {
-      document.getElementById('auth-modal').classList.add('hidden');
-    }
-
-    function showAuthError(message) {
-      const errorDiv = document.getElementById('auth-error');
-      errorDiv.textContent = message;
-      errorDiv.classList.remove('hidden');
-    }
-
-    async function signupUser(username, password) {
-      const submitBtn = document.getElementById('auth-submit-btn');
-      
-      username = username.trim();
-
-      // Validaciones
-      if (!username || !password) {
-        showAuthError('⚠️ Por favor, completa todos los campos');
-        return;
-      }
-
-      if (username.length < 3 || username.length > 20) {
-        showAuthError('⚠️ El nombre debe tener entre 3 y 20 caracteres');
-        return;
-      }
-
-      if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-        showAuthError('⚠️ Solo letras, números y guiones bajos permitidos');
-        return;
-      }
-
-      if (password.length < 6) {
-        showAuthError('⚠️ La contraseña debe tener al menos 6 caracteres');
-        return;
-      }
-
-      try {
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Creando cuenta...';
-
-        await userDB.createUser(username, password);
-
-        currentUser = username;
-        createSession(username);
-        hideAuthModal();
-        updateUIForLoggedInUser();
-        showToast('✅ ¡Cuenta creada exitosamente!');
-        
-        setTimeout(() => updateLeaderboard(), 300);
-
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Crear Cuenta';
-      } catch (error) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Crear Cuenta';
-        
-        if (error.message === 'DUPLICATE_USER') {
-          showAuthError('⚠️ Este nombre de usuario ya está en uso');
-        } else {
-          showAuthError('⚠️ Error al crear la cuenta. Inténtalo de nuevo.');
-        }
-      }
-    }
-
-    async function loginUser(username, password) {
-      const submitBtn = document.getElementById('auth-submit-btn');
-      
-      username = username.trim();
-
-      if (!username || !password) {
-        showAuthError('⚠️ Por favor, completa todos los campos');
-        return;
-      }
-
-      try {
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Iniciando sesión...';
-
-        const user = await userDB.validateUser(username, password);
-        
-        if (!user) {
-          showAuthError('⚠️ Usuario o contraseña incorrectos');
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Iniciar Sesión';
-          return;
-        }
-
-        currentUser = username;
-        createSession(username);
-        hideAuthModal();
-        updateUIForLoggedInUser();
-        showToast('👋 ¡Bienvenido de nuevo!');
-        
-        setTimeout(() => updateLeaderboard(), 300);
-
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Iniciar Sesión';
-      } catch (error) {
-        console.error('Error en login:', error);
-        showAuthError('⚠️ Error de conexión. Inténtalo de nuevo.');
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Iniciar Sesión';
-      }
-    }
-
-    function logout() {
-      destroySession();
-      
-      const nameInputSection = document.getElementById('name-input-section');
-      const logoutBtn = document.getElementById('logout-btn');
-      const deleteBtn = document.getElementById('delete-account-btn');
-      
-      if (nameInputSection) nameInputSection.classList.remove('hidden');
-      if (logoutBtn) logoutBtn.classList.add('hidden');
-      if (deleteBtn) deleteBtn.classList.add('hidden');
-      
-      updatePlayerStats();
-      showToast('👋 Sesión cerrada');
-    }
-
-    function showDeleteModal() {
-      document.getElementById('delete-modal').classList.remove('hidden');
-    }
-
-    function hideDeleteModal() {
-      document.getElementById('delete-modal').classList.add('hidden');
-    }
-
-    function deleteAccount() {
-      if (!currentUser) return;
-
-      userDB.deleteUser(currentUser);
-      destroySession();
-      
-      hideDeleteModal();
-      
-      const nameInputSection = document.getElementById('name-input-section');
-      const logoutBtn = document.getElementById('logout-btn');
-      const deleteBtn = document.getElementById('delete-account-btn');
-      
-      if (nameInputSection) nameInputSection.classList.remove('hidden');
-      if (logoutBtn) logoutBtn.classList.add('hidden');
-      if (deleteBtn) deleteBtn.classList.add('hidden');
-      
-      updatePlayerStats();
-      updateLeaderboard();
-      showToast('🗑️ Cuenta eliminada correctamente');
-    }
-
-    // ==================== DATOS DEL JUGADOR ====================
-
-    function loadUserData() {
-      if (!currentUser) return;
-
-      const userData = userDB.getUser(currentUser);
-      if (userData) {
-        updatePlayerStats(userData);
-      }
-    }
-
-    function updatePlayerStats(userData = null) {
-      const nameDisplay = document.getElementById('player-name-display');
-      const scoreEl = document.getElementById('stat-score');
-      const gamesEl = document.getElementById('stat-games');
-      const streakEl = document.getElementById('stat-streak');
-
-      if (currentUser && userData) {
-        if (nameDisplay) nameDisplay.textContent = currentUser;
-        if (scoreEl) scoreEl.textContent = userData.totalScore || 0;
-        if (gamesEl) gamesEl.textContent = userData.gamesPlayed || 0;
-        if (streakEl) streakEl.textContent = userData.bestStreak || 0;
-      } else if (currentUser) {
-        if (nameDisplay) nameDisplay.textContent = currentUser;
-        loadUserData();
-      } else {
-        if (nameDisplay) nameDisplay.textContent = 'Anónimo';
-        if (scoreEl) scoreEl.textContent = '0';
-        if (gamesEl) gamesEl.textContent = '0';
-        if (streakEl) streakEl.textContent = '0';
-      }
-    }
-
-    function saveScore(scoreData) {
-      if (!currentUser) {
-        showToast('💾 Crea una cuenta para guardar tu progreso');
-        return;
-      }
-
-      const userData = userDB.getUser(currentUser);
-      if (!userData) return;
-
-      const updates = {
-        totalScore: userData.totalScore + scoreData.score,
-        gamesPlayed: userData.gamesPlayed + 1,
-        bestStreak: Math.max(userData.bestStreak, scoreData.bestStreak)
-      };
-
-      userDB.updateUser(currentUser, updates);
-      loadUserData();
-      updateLeaderboard();
-      showToast('💾 ¡Puntuación guardada!');
-    }
-
-    // ==================== LEADERBOARD ====================
-
-    function updateLeaderboard() {
-      const container = document.getElementById('leaderboard');
-      if (!container) return;
-
-      const leaderboard = userDB.getLeaderboard(10);
-
-      if (leaderboard.length === 0) {
-        container.innerHTML = '<p class="text-gray-400 text-center py-8">Aún no hay puntuaciones. ¡Sé el primero!</p>';
-        return;
-      }
-
-      container.innerHTML = leaderboard.map((player, index) => {
-        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
-        const isCurrentPlayer = player.username === currentUser;
-        
-        return `
-          <div class="leaderboard-row flex items-center justify-between p-4 rounded-xl ${isCurrentPlayer ? 'bg-yellow-500/20 border border-yellow-500/50' : 'bg-white/5'}" style="animation-delay: ${index * 0.05}s">
-            <div class="flex items-center gap-4">
-              <span class="text-2xl w-10">${medal}</span>
-              <div>
-                <p class="font-bold text-lg ${isCurrentPlayer ? 'text-yellow-400' : 'text-white'}">${player.username}</p>
-                <p class="text-xs text-gray-400">${player.gamesPlayed} partidas • Racha: ${player.bestStreak}</p>
-              </div>
-            </div>
-            <div class="text-right">
-              <span class="font-bold text-2xl text-yellow-400">${player.totalScore}</span>
-              <span class="text-sm text-gray-400 ml-1">pts</span>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // ==================== DATOS DE VITRASA ====================
-    
+    // ==================== DATOS DE VITRASA 2025 ====================
     const vitrasaData = {
       lines: [
         { number: 'C1', name: 'Circular Centro', color: '#e53935', 
@@ -817,7 +311,6 @@
     };
 
     // ==================== ESTADO DEL JUEGO ====================
-    
     let gameState = {
       mode: 'mixed',
       round: 0,
@@ -836,8 +329,133 @@
       isProcessing: false
     };
 
-    // ==================== NAVEGACIÓN ====================
+    // ==================== GESTIÓN DE PUNTUACIONES CON LOCALSTORAGE ====================
+    function getLeaderboard() {
+      const data = localStorage.getItem('vitrasaLeaderboard');
+      return data ? JSON.parse(data) : [];
+    }
 
+    function saveToLeaderboard(playerData) {
+      let leaderboard = getLeaderboard();
+      const existingIndex = leaderboard.findIndex(p => p.name === playerData.name);
+      
+      if (existingIndex >= 0) {
+        leaderboard[existingIndex].totalScore += playerData.score;
+        leaderboard[existingIndex].gamesPlayed += 1;
+        leaderboard[existingIndex].bestStreak = Math.max(
+          leaderboard[existingIndex].bestStreak, 
+          playerData.bestStreak
+        );
+      } else {
+        leaderboard.push({
+          name: playerData.name,
+          totalScore: playerData.score,
+          gamesPlayed: 1,
+          bestStreak: playerData.bestStreak,
+          timestamp: new Date().toISOString()
+        });
+      }
+      
+      leaderboard.sort((a, b) => b.totalScore - a.totalScore);
+      localStorage.setItem('vitrasaLeaderboard', JSON.stringify(leaderboard));
+      updateLeaderboard();
+      updatePlayerStats();
+    }
+
+    function updateLeaderboard() {
+      const container = document.getElementById('leaderboard');
+      if (!container) return;
+
+      const leaderboard = getLeaderboard().slice(0, 10);
+      
+      if (leaderboard.length === 0) {
+        container.innerHTML = '<p class="text-gray-400 text-center py-4">Aún no hay puntuaciones. ¡Sé el primero!</p>';
+        return;
+      }
+
+      const currentPlayerName = localStorage.getItem('vitrasaPlayerName') || '';
+      
+      container.innerHTML = leaderboard.map((player, index) => {
+        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+        const isCurrentPlayer = player.name === currentPlayerName;
+        
+        return `
+          <div class="leaderboard-row flex items-center justify-between p-3 rounded-xl ${isCurrentPlayer ? 'bg-yellow-500/20 border border-yellow-500/50' : 'bg-white/5'}" style="animation-delay: ${index * 0.05}s">
+            <div class="flex items-center gap-3">
+              <span class="text-xl w-8">${medal}</span>
+              <span class="font-semibold ${isCurrentPlayer ? 'text-yellow-400' : ''}">${player.name}</span>
+            </div>
+            <div class="text-right">
+              <span class="font-bold text-yellow-400">${player.totalScore}</span>
+              <span class="text-xs text-gray-400 ml-1">pts</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updatePlayerStats() {
+      const currentPlayerName = localStorage.getItem('vitrasaPlayerName') || '';
+      const leaderboard = getLeaderboard();
+      const currentPlayer = leaderboard.find(p => p.name === currentPlayerName);
+
+      const nameDisplay = document.getElementById('player-name-display');
+      const scoreEl = document.getElementById('stat-score');
+      const gamesEl = document.getElementById('stat-games');
+      const streakEl = document.getElementById('stat-streak');
+
+      if (currentPlayer) {
+        if (nameDisplay) nameDisplay.textContent = currentPlayer.name;
+        if (scoreEl) scoreEl.textContent = currentPlayer.totalScore;
+        if (gamesEl) gamesEl.textContent = currentPlayer.gamesPlayed;
+        if (streakEl) streakEl.textContent = currentPlayer.bestStreak;
+      } else {
+        if (nameDisplay) nameDisplay.textContent = currentPlayerName || 'Anónimo';
+        if (scoreEl) scoreEl.textContent = '0';
+        if (gamesEl) gamesEl.textContent = '0';
+        if (streakEl) streakEl.textContent = '0';
+      }
+    }
+
+    // ==================== GESTIÓN DE NOMBRE ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      // Ocultar loader después de 2 segundos
+      setTimeout(() => {
+        const loader = document.getElementById('screen-loader');
+        if (loader) {
+          loader.style.opacity = '0';
+          loader.style.transition = 'opacity 0.5s ease';
+          setTimeout(() => loader.remove(), 500);
+        }
+      }, 2000);
+
+      const saveBtn = document.getElementById('save-name-btn');
+      const nameInput = document.getElementById('player-name-input');
+      
+      const savedName = localStorage.getItem('vitrasaPlayerName');
+      if (savedName && nameInput) {
+        nameInput.value = savedName;
+      }
+
+      if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+          const name = nameInput?.value?.trim();
+          if (!name) {
+            showToast('Por favor, escribe tu nombre');
+            return;
+          }
+          
+          localStorage.setItem('vitrasaPlayerName', name);
+          updatePlayerStats();
+          showToast('¡Nombre guardado!');
+        });
+      }
+
+      updateLeaderboard();
+      updatePlayerStats();
+    });
+
+    // ==================== NAVEGACIÓN ====================
     function showScreen(screenId) {
       ['screen-home', 'screen-game', 'screen-results'].forEach(id => {
         const el = document.getElementById(id);
@@ -863,13 +481,12 @@
     }
 
     // ==================== TOAST NOTIFICATIONS ====================
-
     function showToast(message, duration = 3000) {
-      const existing = document.querySelector('.toast');
+      const existing = document.querySelector('.toast-notification');
       if (existing) existing.remove();
 
       const toast = document.createElement('div');
-      toast.className = 'toast';
+      toast.className = 'toast-notification fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-lg z-50 fade-in';
       toast.textContent = message;
       document.body.appendChild(toast);
 
@@ -877,7 +494,6 @@
     }
 
     // ==================== LÓGICA DEL JUEGO ====================
-
     function startMixedGame() {
       gameState = {
         mode: 'mixed',
@@ -957,7 +573,6 @@
     }
 
     // ==================== GENERADORES DE DESAFÍOS ====================
-
     function generateMemoryChallenge() {
       const lines = shuffleArray([...vitrasaData.lines]).slice(0, 6);
       const pairs = lines.map(line => [
@@ -968,9 +583,9 @@
       return {
         type: 'memory',
         title: '🎴 Memoria de Rutas',
-        instruction: 'Encuentra las parejas: línea con su destino',
+        instruction: 'Encuentra las parejas: línea con su destino principal',
         cards: shuffleArray(pairs),
-        timeLimit: 45
+        timeLimit: 70
       };
     }
 
@@ -980,7 +595,7 @@
           const passengers = Math.floor(Math.random() * 5) + 2;
           const price = vitrasaData.prices.ordinario;
           return {
-            question: `${passengers} pasajeros pagan billete ordinario (${price}€). ¿Total?`,
+            question: `${passengers} pasajeros compran billete ordinario (${price}€ cada uno). ¿Cuánto pagan en total?`,
             answer: (passengers * price).toFixed(2),
             options: generateOptions((passengers * price).toFixed(2), 'money')
           };
@@ -991,9 +606,42 @@
           const cost = trips * vitrasaData.prices.ordinario;
           const change = paid - cost;
           return {
-            question: `Pago ${paid}€ por ${trips} billete(s) (${vitrasaData.prices.ordinario}€). ¿Cambio?`,
+            question: `Pago ${paid}€ por ${trips} billete${trips > 1 ? 's' : ''} ordinario${trips > 1 ? 's' : ''} (${vitrasaData.prices.ordinario}€). ¿Cuánto me devuelven?`,
             answer: change.toFixed(2),
             options: generateOptions(change.toFixed(2), 'money')
+          };
+        },
+        () => {
+          const trips = Math.floor(Math.random() * 5) + 6;
+          const passVigoPrice = vitrasaData.prices.passVigoGeneral;
+          const ordinaryPrice = vitrasaData.prices.ordinario;
+          const passCost = (trips * passVigoPrice).toFixed(2);
+          const ordinaryCost = (trips * ordinaryPrice).toFixed(2);
+          const savings = (ordinaryCost - passCost).toFixed(2);
+          return {
+            question: `¿Cuánto ahorro en ${trips} viajes con PassVigo General (${passVigoPrice}€/viaje) vs billete ordinario (${ordinaryPrice}€)?`,
+            answer: savings,
+            options: generateOptions(savings, 'money')
+          };
+        },
+        () => {
+          const studentPrice = vitrasaData.prices.passVigoEstudiante;
+          const universityPrice = vitrasaData.prices.passVigoUniversitario;
+          const difference = (studentPrice - universityPrice).toFixed(2);
+          return {
+            question: `¿Cuánto más barata es la tarifa universitaria (${universityPrice}€) que la de estudiante (${studentPrice}€) por viaje?`,
+            answer: difference,
+            options: generateOptions(difference, 'money')
+          };
+        },
+        () => {
+          const trips = 20;
+          const socialPrice = vitrasaData.prices.passVigoSocial;
+          const total = (trips * socialPrice).toFixed(2);
+          return {
+            question: `Un usuario con tarifa PassVigo Social (${socialPrice}€/viaje) hace ${trips} viajes al mes. ¿Cuánto paga?`,
+            answer: total,
+            options: generateOptions(total, 'money')
           };
         }
       ];
@@ -1003,7 +651,7 @@
       return {
         type: 'calculation',
         title: '🔢 Cálculo Rápido',
-        instruction: 'Resuelve el problema',
+        instruction: 'Resuelve el problema de tarifas',
         ...scenario,
         timeLimit: 20
       };
@@ -1014,7 +662,7 @@
       const destination = line.destinations[Math.floor(Math.random() * line.destinations.length)];
       
       const wrongLines = vitrasaData.lines
-        .filter(l => l.number !== line.number)
+        .filter(l => l.number !== line.number && !l.destinations.includes(destination))
         .slice(0, 3)
         .map(l => l.number);
       
@@ -1047,39 +695,67 @@
         lineColor: line.color,
         stops: shuffledStops,
         correctOrder: correctOrder,
-        timeLimit: 25
+        timeLimit: 30
       };
     }
 
     function generateSpeedChallenge() {
-      const line = vitrasaData.lines[Math.floor(Math.random() * vitrasaData.lines.length)];
-      const wrongDest = vitrasaData.stops.filter(s => !line.destinations.includes(s)).slice(0, 3);
+      const types = ['color', 'destination', 'count'];
+      const type = types[Math.floor(Math.random() * types.length)];
       
-      return {
-        type: 'speed',
-        subtype: 'destination',
-        title: '⚡ Respuesta Rápida',
-        instruction: `¿Destino de la línea ${line.number}?`,
-        lineNumber: line.number,
-        lineColor: line.color,
-        answer: line.destinations[0],
-        options: shuffleArray([line.destinations[0], ...wrongDest]),
-        timeLimit: 10
-      };
+      if (type === 'color') {
+        const line = vitrasaData.lines[Math.floor(Math.random() * vitrasaData.lines.length)];
+        return {
+          type: 'speed',
+          subtype: 'color',
+          title: '⚡ Respuesta Rápida',
+          instruction: '¿De qué color es esta línea?',
+          lineNumber: line.number,
+          lineColor: line.color,
+          answer: line.color,
+          options: shuffleArray([line.color, ...getRandomColors(3, line.color)]),
+          timeLimit: 8
+        };
+      } else if (type === 'destination') {
+        const line = vitrasaData.lines[Math.floor(Math.random() * vitrasaData.lines.length)];
+        const wrongDest = vitrasaData.stops.filter(s => !line.destinations.includes(s)).slice(0, 3);
+        return {
+          type: 'speed',
+          subtype: 'destination',
+          title: '⚡ Respuesta Rápida',
+          instruction: `¿Cuál es un destino de la línea ${line.number}?`,
+          lineNumber: line.number,
+          answer: line.destinations[0],
+          options: shuffleArray([line.destinations[0], ...wrongDest]),
+          timeLimit: 10
+        };
+      } else {
+        const count = Math.floor(Math.random() * 4) + 3;
+        return {
+          type: 'speed',
+          subtype: 'count',
+          title: '⚡ Respuesta Rápida',
+          instruction: '¿Cuántos buses ves?',
+          busCount: count,
+          answer: count.toString(),
+          options: shuffleArray([count.toString(), (count-1).toString(), (count+1).toString(), (count+2).toString()]),
+          timeLimit: 8
+        };
+      }
     }
 
     function generatePairsChallenge() {
       const selectedLines = shuffleArray([...vitrasaData.lines]).slice(0, 4);
       const pairs = selectedLines.map(line => ({
         line: line.number,
-        destination: line.destinations[0],
+        destination: line.destinations[line.destinations.length - 1],
         color: line.color
       }));
       
       return {
         type: 'pairs',
         title: '👯 Une las Parejas',
-        instruction: 'Conecta línea con destino',
+        instruction: 'Conecta cada línea con su destino final',
         pairs: pairs,
         shuffledDestinations: shuffleArray(pairs.map(p => p.destination)),
         timeLimit: 20
@@ -1087,15 +763,14 @@
     }
 
     // ==================== RENDERIZADO DE DESAFÍOS ====================
-
     function renderChallenge(challenge) {
       const area = document.getElementById('challenge-area');
       if (!area) return;
 
       let html = `
-        <div class="text-center mb-6">
-          <h2 class="text-3xl font-bold mb-2 title-font">${challenge.title}</h2>
-          <p class="text-xl text-gray-300">${challenge.instruction}</p>
+        <div class="text-center mb-4">
+          <h2 class="text-2xl font-bold mb-1">${challenge.title}</h2>
+          <p class="text-gray-300">${challenge.instruction}</p>
         </div>
       `;
 
@@ -1133,41 +808,40 @@
       gameState.matchedPairs = 0;
 
       return `
-        <div class="grid grid-cols-3 md:grid-cols-4 gap-4" id="memory-grid">
+        <div class="grid grid-cols-3 md:grid-cols-4 gap-3" id="memory-grid">
           ${challenge.cards.map((card, index) => `
             <div class="memory-card aspect-square" data-index="${index}" onclick="flipCard(${index})">
-              <div class="memory-card-inner">
-                <div class="memory-card-front">
-                  <span class="text-4xl">🚌</span>
+              <div class="memory-card-inner relative w-full h-full">
+                <div class="memory-card-front bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
+                  <span class="text-3xl">🚌</span>
                 </div>
-                <div class="memory-card-back">
+                <div class="memory-card-back bg-white flex flex-col items-center justify-center p-2">
                   ${card.type === 'line' ? `
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-xl" style="background-color: ${card.color}">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg" style="background-color: ${card.color}">
                       ${card.value}
                     </div>
+                    <p class="text-xs text-gray-600 mt-1">Línea</p>
                   ` : `
-                    <div class="p-2 text-center">
-                      <div class="w-4 h-4 rounded-full mx-auto mb-1" style="background-color: ${card.color}"></div>
-                      <p class="text-sm font-bold text-gray-800">${card.value}</p>
-                    </div>
+                    <div class="w-3 h-3 rounded-full mb-1" style="background-color: ${card.color}"></div>
+                    <p class="text-sm font-semibold text-gray-800 text-center">${card.value}</p>
                   `}
                 </div>
               </div>
             </div>
           `).join('')}
         </div>
-        <p class="text-center mt-6 text-xl">Parejas: <span id="pairs-count" class="font-bold text-yellow-400">0</span>/${challenge.cards.length / 2}</p>
+        <p class="text-center mt-4 text-gray-400">Parejas encontradas: <span id="pairs-count">0</span>/${challenge.cards.length / 2}</p>
       `;
     }
 
     function renderCalculationChallenge(challenge) {
       return `
-        <div class="bg-white/10 rounded-2xl p-8 mb-8">
-          <p class="text-2xl text-center font-semibold">${challenge.question}</p>
+        <div class="bg-white/10 rounded-xl p-6 mb-6">
+          <p class="text-xl text-center">${challenge.question}</p>
         </div>
         <div class="grid grid-cols-2 gap-4">
           ${challenge.options.map(option => `
-            <button onclick="checkAnswer('${option}')" class="challenge-card rounded-2xl p-6 text-center text-gray-800 text-3xl font-bold">
+            <button onclick="checkAnswer('${option}')" class="bus-card rounded-xl p-4 text-center text-gray-800 text-2xl font-bold hover:scale-105 transition">
               ${option}€
             </button>
           `).join('')}
@@ -1177,20 +851,25 @@
 
     function renderRoutesChallenge(challenge) {
       return `
-        <div class="text-center mb-8">
-          <div class="inline-block bg-purple-500/20 rounded-2xl px-10 py-6 border border-purple-500/50">
-            <p class="text-4xl font-bold">${challenge.question}</p>
+        <div class="text-center mb-6">
+          <div class="inline-block bg-white/20 rounded-2xl px-8 py-4">
+            <p class="text-3xl font-bold">${challenge.question}</p>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-4">
           ${challenge.options.map(option => {
             const line = vitrasaData.lines.find(l => l.number === option);
             return `
-              <button onclick="checkAnswer('${option}')" class="challenge-card rounded-2xl p-6 flex flex-col items-center justify-center gap-3">
-                <div class="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-2xl" style="background-color: ${line?.color || '#666'}">
-                  ${option}
+              <button onclick="checkAnswer('${option}')" class="bus-card rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:scale-105 transition">
+                ${line && line.image ? `
+                  <img src="${line.image}" alt="Bus línea ${option}" class="h-20 w-auto rounded-lg" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.display='none';">
+                ` : ''}
+                <div class="flex items-center gap-2">
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg" style="background-color: ${line?.color || '#666'}">
+                    ${option}
+                  </div>
+                  <span class="text-gray-800 font-semibold">Línea ${option}</span>
                 </div>
-                <span class="text-gray-800 font-bold text-lg">Línea ${option}</span>
               </button>
             `;
           }).join('')}
@@ -1200,40 +879,81 @@
 
     function renderSequenceChallenge(challenge) {
       return `
-        <div class="flex items-center justify-center gap-4 mb-8">
-          <div class="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-2xl" style="background-color: ${challenge.lineColor}">
+        <div class="flex items-center justify-center gap-3 mb-6">
+          <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-xl" style="background-color: ${challenge.lineColor}">
             ${challenge.lineNumber}
           </div>
-          <span class="text-2xl font-bold">${challenge.lineName}</span>
+          <span class="text-xl font-semibold">${challenge.lineName}</span>
         </div>
-        <div id="sequence-container" class="space-y-3">
+        <div id="sequence-container" class="space-y-2">
           ${challenge.stops.map((stop, index) => `
-            <div class="sequence-item challenge-card rounded-xl p-4 cursor-move flex items-center gap-4" data-stop="${stop}" draggable="true">
-              <span class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold">${index + 1}</span>
-              <span class="text-gray-800 font-bold text-lg flex-1">${stop}</span>
-              <span class="text-gray-400 text-xl">≡</span>
+            <div class="sequence-item bus-card rounded-xl p-3 cursor-move flex items-center gap-3" data-stop="${stop}" draggable="true">
+              <span class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold">${index + 1}</span>
+              <span class="text-gray-800 font-semibold">${stop}</span>
+              <span class="ml-auto text-gray-400">≡</span>
             </div>
           `).join('')}
         </div>
-        <button onclick="checkSequence()" class="w-full mt-6 neon-btn py-4 rounded-xl font-bold text-white text-lg">
+        <button onclick="checkSequence()" class="w-full mt-4 btn-primary py-3 rounded-xl font-bold text-gray-900">
           ✓ Comprobar Orden
         </button>
       `;
     }
 
     function renderSpeedChallenge(challenge) {
-      return `
-        <div class="text-center mb-8">
-          <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-white font-bold text-3xl" style="background-color: ${challenge.lineColor}">
-            ${challenge.lineNumber}
+      let visualContent = '';
+      
+      if (challenge.subtype === 'color') {
+        const line = vitrasaData.lines.find(l => l.number === challenge.lineNumber);
+        visualContent = `
+          <div class="flex justify-center mb-6">
+            ${line && line.image ? `
+              <img src="${line.image}" alt="Bus línea ${challenge.lineNumber}" class="rounded-xl max-h-48 w-auto shadow-lg" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+              <div class="w-24 h-24 rounded-full flex items-center justify-center text-white font-bold text-4xl hidden" style="background-color: ${challenge.lineColor}">
+                ${challenge.lineNumber}
+              </div>
+            ` : `
+              <div class="w-24 h-24 rounded-full flex items-center justify-center text-white font-bold text-4xl" style="background-color: ${challenge.lineColor}">
+                ${challenge.lineNumber}
+              </div>
+            `}
           </div>
-        </div>
+        `;
+      } else if (challenge.subtype === 'count') {
+        const buses = [];
+        const selectedImages = shuffleArray([...vitrasaData.busImages]).slice(0, challenge.busCount);
+        for (let i = 0; i < challenge.busCount; i++) {
+          buses.push(`
+            <div class="transform" style="transform: rotate(${Math.random() * 10 - 5}deg)">
+              <img src="${selectedImages[i]}" alt="Bus Vitrasa" class="h-16 w-auto rounded-lg shadow" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.display='none';">
+            </div>
+          `);
+        }
+        visualContent = `
+          <div class="flex flex-wrap justify-center gap-4 mb-6">
+            ${buses.join('')}
+          </div>
+        `;
+      }
+
+      return `
+        ${visualContent}
         <div class="grid grid-cols-2 gap-4">
-          ${challenge.options.map(option => `
-            <button onclick="checkAnswer('${option}')" class="challenge-card rounded-xl p-5 text-center text-gray-800 font-bold text-lg">
-              ${option}
-            </button>
-          `).join('')}
+          ${challenge.options.map(option => {
+            if (challenge.subtype === 'color') {
+              return `
+                <button onclick="checkAnswer('${option}')" class="bus-card rounded-xl p-4 flex items-center justify-center gap-3 hover:scale-105 transition">
+                  <div class="w-10 h-10 rounded-full" style="background-color: ${option}"></div>
+                </button>
+              `;
+            } else {
+              return `
+                <button onclick="checkAnswer('${option}')" class="bus-card rounded-xl p-4 text-center text-gray-800 text-2xl font-bold hover:scale-105 transition">
+                  ${option}
+                </button>
+              `;
+            }
+          }).join('')}
         </div>
       `;
     }
@@ -1245,33 +965,32 @@
       return `
         <div class="grid grid-cols-2 gap-6">
           <div class="space-y-3">
-            <h3 class="text-center font-bold text-xl text-gray-300 mb-4">Líneas</h3>
+            <h3 class="text-center font-semibold text-gray-300 mb-2">Líneas</h3>
             ${challenge.pairs.map(pair => `
               <button onclick="selectLine('${pair.line}')" id="line-${pair.line}" 
-                      class="w-full challenge-card rounded-xl p-4 flex items-center gap-3">
-                <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg" style="background-color: ${pair.color}">
+                      class="w-full bus-card rounded-xl p-3 flex items-center gap-3 transition">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold" style="background-color: ${pair.color}">
                   ${pair.line}
                 </div>
-                <span class="text-gray-800 font-bold">Línea ${pair.line}</span>
+                <span class="text-gray-800 font-semibold">Línea ${pair.line}</span>
               </button>
             `).join('')}
           </div>
           <div class="space-y-3">
-            <h3 class="text-center font-bold text-xl text-gray-300 mb-4">Destinos</h3>
+            <h3 class="text-center font-semibold text-gray-300 mb-2">Destinos</h3>
             ${challenge.shuffledDestinations.map(dest => `
               <button onclick="selectDestination('${dest}')" id="dest-${dest.replace(/\s+/g, '-')}" 
-                      class="w-full challenge-card rounded-xl p-4 text-center text-gray-800 font-bold">
+                      class="w-full bus-card rounded-xl p-3 text-center text-gray-800 font-semibold transition">
                 ${dest}
               </button>
             `).join('')}
           </div>
         </div>
-        <p class="text-center mt-6 text-xl">Parejas unidas: <span id="pairs-matched" class="font-bold text-yellow-400">0</span>/${challenge.pairs.length}</p>
+        <p class="text-center mt-4 text-gray-400">Parejas unidas: <span id="pairs-matched">0</span>/${challenge.pairs.length}</p>
       `;
     }
 
     // ==================== LÓGICA DE MEMORIA ====================
-
     function flipCard(index) {
       if (gameState.isProcessing) return;
       if (gameState.flippedCards.includes(index)) return;
@@ -1317,7 +1036,6 @@
     }
 
     // ==================== LÓGICA DE SECUENCIA ====================
-
     function initDragAndDrop() {
       const container = document.getElementById('sequence-container');
       if (!container) return;
@@ -1387,7 +1105,6 @@
     }
 
     // ==================== LÓGICA DE PAREJAS ====================
-
     function selectLine(lineNumber) {
       document.querySelectorAll('[id^="line-"]').forEach(el => el.classList.remove('selected'));
       document.getElementById(`line-${lineNumber}`).classList.add('selected');
@@ -1396,7 +1113,7 @@
 
     function selectDestination(destination) {
       if (!gameState.selectedLine) {
-        showToast('⚠️ Primero selecciona una línea');
+        showToast('Primero selecciona una línea');
         return;
       }
 
@@ -1432,17 +1149,16 @@
     }
 
     // ==================== COMPROBACIÓN DE RESPUESTAS ====================
-
     function checkAnswer(answer) {
       const challenge = gameState.currentChallenge;
       const isCorrect = answer === challenge.answer || answer === challenge.answer.toString();
       
-      const buttons = document.querySelectorAll('.challenge-card');
+      const buttons = document.querySelectorAll('.bus-card');
       buttons.forEach(btn => {
         btn.disabled = true;
-        if (btn.textContent.includes(challenge.answer)) {
+        if (btn.textContent.includes(challenge.answer) || btn.querySelector(`[style*="${challenge.answer}"]`)) {
           btn.classList.add('correct');
-        } else if (btn.textContent.includes(answer)) {
+        } else if (btn.textContent.includes(answer) || btn.onclick?.toString().includes(answer)) {
           if (!isCorrect) btn.classList.add('incorrect');
         }
       });
@@ -1461,10 +1177,10 @@
         gameState.correctAnswers++;
         gameState.bestStreak = Math.max(gameState.bestStreak, gameState.streak);
         
-        showToast(`✅ ¡Correcto! +${points} puntos`);
+        showToast(`¡Correcto! +${points} puntos 🎉`);
       } else {
         gameState.streak = 0;
-        showToast('❌ Incorrecto');
+        showToast('¡Incorrecto! 😅');
       }
 
       updateGameUI();
@@ -1479,7 +1195,6 @@
     }
 
     // ==================== CONTROL DE RONDAS ====================
-
     function nextRound() {
       gameState.round++;
       gameState.currentChallenge = gameState.challenges[gameState.round - 1];
@@ -1494,10 +1209,16 @@
       document.getElementById('game-score').textContent = gameState.score;
       document.getElementById('round-display').textContent = `${gameState.round}/${gameState.totalRounds}`;
       document.getElementById('current-streak').textContent = gameState.streak;
+      
+      const streakEl = document.getElementById('current-streak');
+      if (gameState.streak >= 3) {
+        streakEl.classList.add('streak-fire');
+      } else {
+        streakEl.classList.remove('streak-fire');
+      }
     }
 
     // ==================== TEMPORIZADOR ====================
-
     function startTimer() {
       const timerBar = document.getElementById('timer-bar');
       const totalTime = gameState.currentChallenge.timeLimit;
@@ -1522,7 +1243,6 @@
     }
 
     // ==================== RESULTADOS ====================
-
     function showResults() {
       stopTimer();
       
@@ -1532,18 +1252,21 @@
 
       let message = '';
       if (gameState.score >= 800) {
-        message = '🏆 ¡Experto Total de Vitrasa!';
+        message = '🏆 ¡Eres un experto de Vitrasa!';
       } else if (gameState.score >= 500) {
-        message = '🌟 ¡Excelente Trabajo!';
+        message = '🌟 ¡Muy buen trabajo, viajero!';
       } else if (gameState.score >= 300) {
-        message = '👍 ¡Buen Esfuerzo!';
+        message = '👍 ¡Buen comienzo! Sigue practicando.';
       } else {
-        message = '💪 ¡Sigue Practicando!';
+        message = '🚌 ¡A seguir conociendo las rutas!';
       }
       document.getElementById('result-message').textContent = message;
 
-      if (currentUser) {
-        saveScore({
+      // Guardar puntuación en localStorage
+      const playerName = localStorage.getItem('vitrasaPlayerName') || 'Anónimo';
+      if (playerName !== 'Anónimo') {
+        saveToLeaderboard({
+          name: playerName,
           score: gameState.score,
           bestStreak: gameState.bestStreak
         });
@@ -1553,7 +1276,6 @@
     }
 
     // ==================== UTILIDADES ====================
-
     function shuffleArray(array) {
       const arr = [...array];
       for (let i = arr.length - 1; i > 0; i--) {
@@ -1582,43 +1304,10 @@
       return shuffleArray(options);
     }
 
-    // ==================== INICIALIZACIÓN ====================
-
-    document.addEventListener('DOMContentLoaded', () => {
-      checkSession();
-      updateLeaderboard();
-      updatePlayerStats();
-
-      // Event listeners
-      document.getElementById('show-auth-btn')?.addEventListener('click', () => showAuthModal('signup'));
-      
-      document.getElementById('auth-submit-btn')?.addEventListener('click', async () => {
-        const username = document.getElementById('auth-username').value.trim();
-        const password = document.getElementById('auth-password').value;
-        
-        if (authMode === 'signup') {
-          await signupUser(username, password);
-        } else {
-          await loginUser(username, password);
-        }
-      });
-
-      document.getElementById('auth-switch-btn')?.addEventListener('click', () => {
-        const newMode = authMode === 'signup' ? 'login' : 'signup';
-        showAuthModal(newMode);
-      });
-
-      document.getElementById('logout-btn')?.addEventListener('click', logout);
-      document.getElementById('delete-account-btn')?.addEventListener('click', showDeleteModal);
-      document.getElementById('cancel-delete-btn')?.addEventListener('click', hideDeleteModal);
-      document.getElementById('confirm-delete-btn')?.addEventListener('click', deleteAccount);
-
-      document.getElementById('auth-password')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          document.getElementById('auth-submit-btn').click();
-        }
-      });
-    });
+    function getRandomColors(count, exclude) {
+      const colors = ['#e53935', '#1e88e5', '#43a047', '#fb8c00', '#8e24aa', '#00acc1', '#d81b60', '#5e35b1', '#00897b', '#c0ca33', '#6d4c41', '#546e7a'];
+      return shuffleArray(colors.filter(c => c !== exclude)).slice(0, count);
+    }
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c7b7f4451acd929',t:'MTc3MDA1NDI3Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c62eec106e1a431',t:'MTc2OTc5NjY5NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
