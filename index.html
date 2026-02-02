@@ -277,49 +277,192 @@
    </div>
   </div>
   <script>
-    // ==================== ALMACENAMIENTO COMPARTIDO GLOBAL ====================
-    // Sistema de almacenamiento distribuido usando múltiples servicios gratuitos
+    // ==================== ALMACENAMIENTO COMPARTIDO GLOBAL REAL ====================
+    // Usando Supabase - Base de datos PostgreSQL en la nube REAL y GRATUITA
     
-    const STORAGE_CONFIG = {
-      // Usamos localStorage como caché local y sincronizamos con un servidor público
-      primary: 'https://api.npoint.io/f8c5e9d3b4a2c1d7e6f0',  // Servicio JSON público gratuito
-      backup: 'localStorage'
+    const SUPABASE_CONFIG = {
+      url: 'https://xlwvuzhmpfyrrhzbztzd.supabase.co',
+      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhsd3Z1emhtcGZ5cnJoemJ6dHpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc1NjU4MDAsImV4cCI6MjA1MzE0MTgwMH0.6Y8vZwKjQx_YBcL5kN6iZGVfXQ8rK5mE9pD7sR2nW4c'
     };
 
-    // Simulación de base de datos compartida (en producción usaría un backend real)
-    // Por ahora usamos localStorage con identificador único para simular persistencia
-    const SHARED_DB_KEY = 'cortex_vitrasa_global_db_v1';
+    // Cliente Supabase simple (sin SDK externo)
+    class SupabaseClient {
+      constructor(url, key) {
+        this.url = url;
+        this.key = key;
+        this.headers = {
+          'apikey': key,
+          'Authorization': `Bearer ${key}`,
+          'Content-Type': 'application/json'
+        };
+      }
 
-    async function getGlobalData() {
-      try {
-        // Primero intentamos cargar desde el almacenamiento local
-        const localData = localStorage.getItem(SHARED_DB_KEY);
-        if (localData) {
-          return JSON.parse(localData);
-        }
+      async query(table, method = 'GET', body = null, params = '') {
+        const url = `${this.url}/rest/v1/${table}${params}`;
+        const options = {
+          method,
+          headers: this.headers
+        };
         
-        // Si no hay datos locales, retornamos estructura vacía
-        return { users: {}, lastSync: Date.now() };
-      } catch (error) {
-        console.error('Error al cargar datos:', error);
-        return { users: {}, lastSync: Date.now() };
+        if (body) {
+          options.body = JSON.stringify(body);
+        }
+
+        const response = await fetch(url, options);
+        
+        if (!response.ok) {
+          throw new Error(`Supabase error: ${response.status}`);
+        }
+
+        return method === 'DELETE' ? null : await response.json();
+      }
+
+      async select(table, params = '') {
+        return this.query(table, 'GET', null, params);
+      }
+
+      async insert(table, data) {
+        return this.query(table, 'POST', data);
+      }
+
+      async update(table, data, params) {
+        return this.query(table, 'PATCH', data, params);
+      }
+
+      async upsert(table, data) {
+        return this.query(table, 'POST', data, '?on_conflict=username');
+      }
+
+      async delete(table, params) {
+        return this.query(table, 'DELETE', null, params);
       }
     }
 
-    async function setGlobalData(data) {
+    const supabase = new SupabaseClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+
+    // Cache local para reducir llamadas
+    let usersCache = null;
+    let lastCacheTime = 0;
+    const CACHE_DURATION = 5000; // 5 segundos
+
+    async function getAllUsers() {
       try {
-        // Añadimos timestamp de sincronización
-        data.lastSync = Date.now();
+        const now = Date.now();
+        if (usersCache && (now - lastCacheTime) < CACHE_DURATION) {
+          return usersCache;
+        }
+
+        const users = await supabase.select('cortex_users', '?select=*');
+        usersCache = users;
+        lastCacheTime = now;
         
-        // Guardamos en localStorage
-        localStorage.setItem(SHARED_DB_KEY, JSON.stringify(data));
+        return users;
+      } catch (error) {
+        console.error('Error al cargar usuarios:', error);
+        return [];
+      }
+    }
+
+    async function getUserByUsername(username) {
+      try {
+        const users = await supabase.select('cortex_users', `?username=eq.${encodeURIComponent(username)}`);
+        return users.length > 0 ? users[0] : null;
+      } catch (error) {
+        console.error('Error al buscar usuario:', error);
+        return null;
+      }
+    }
+
+    async function createUser(username, password) {
+      try {
+        const hashedPassword = await hashPassword(password);
+        const userData = {
+          username: username,
+          password: hashedPassword,
+          total_score: 0,
+          games_played: 0,
+          best_streak: 0,
+          created_at: new Date().toISOString()
+        };
         
-        // En una implementación real, aquí enviaríamos los datos a un servidor
-        // Por ahora simulamos que se guardó correctamente
+        const result = await supabase.insert('cortex_users', userData);
+        usersCache = null; // Invalidar caché
+        return result;
+      } catch (error) {
+        console.error('Error al crear usuario:', error);
+        throw error;
+      }
+    }
+
+    async function updateUser(username, updates) {
+      try {
+        const result = await supabase.update(
+          'cortex_users', 
+          updates, 
+          `?username=eq.${encodeURIComponent(username)}`
+        );
+        usersCache = null; // Invalidar caché
+        return result;
+      } catch (error) {
+        console.error('Error al actualizar usuario:', error);
+        throw error;
+      }
+    }
+
+    async function deleteUser(username) {
+      try {
+        await supabase.delete('cortex_users', `?username=eq.${encodeURIComponent(username)}`);
+        usersCache = null; // Invalidar caché
         return true;
       } catch (error) {
-        console.error('Error al guardar datos:', error);
-        return false;
+        console.error('Error al eliminar usuario:', error);
+        throw error;
+      }
+    }
+
+    // Cargar datos del usuario
+    async function loadUserData() {
+      if (!currentUser) return;
+
+      try {
+        const userData = await getUserByUsername(currentUser);
+        if (userData) {
+          updatePlayerStats({
+            totalScore: userData.total_score || 0,
+            gamesPlayed: userData.games_played || 0,
+            bestStreak: userData.best_streak || 0
+          });
+        }
+      } catch (error) {
+        console.error('Error al cargar datos:', error);
+      }
+    }
+
+    // Guardar puntuación
+    async function saveScore(playerData) {
+      if (!currentUser) {
+        showToast('Crea una cuenta para guardar tu progreso');
+        return;
+      }
+
+      try {
+        const userData = await getUserByUsername(currentUser);
+        
+        if (userData) {
+          const updates = {
+            total_score: userData.total_score + playerData.score,
+            games_played: userData.games_played + 1,
+            best_streak: Math.max(userData.best_streak, playerData.bestStreak),
+            last_played: new Date().toISOString()
+          };
+          
+          await updateUser(currentUser, updates);
+          loadUserData();
+          updateLeaderboard();
+        }
+      } catch (error) {
+        console.error('Error al guardar puntuación:', error);
+        showToast('Error al guardar los datos');
       }
     }
 
@@ -459,36 +602,18 @@
         submitBtn.disabled = true;
         submitBtn.textContent = 'Creando cuenta...';
 
-        // Obtener todos los usuarios del servidor global
-        const globalData = await getGlobalData();
-        
         // Verificar si el usuario ya existe
-        if (globalData.users[username]) {
+        const existingUser = await getUserByUsername(username);
+        
+        if (existingUser) {
           showAuthError('Este nombre de usuario ya está en uso');
           submitBtn.disabled = false;
           submitBtn.textContent = 'Crear Cuenta';
           return;
         }
 
-        // Crear usuario
-        const hashedPassword = await hashPassword(password);
-        globalData.users[username] = {
-          password: hashedPassword,
-          totalScore: 0,
-          gamesPlayed: 0,
-          bestStreak: 0,
-          createdAt: Date.now()
-        };
-        
-        // Guardar en el servidor global
-        const saved = await setGlobalData(globalData);
-        
-        if (!saved) {
-          showAuthError('Error de conexión. Inténtalo de nuevo.');
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Crear Cuenta';
-          return;
-        }
+        // Crear usuario en Supabase
+        await createUser(username, password);
 
         currentUser = username;
         createSession(username);
@@ -521,17 +646,16 @@
         submitBtn.disabled = true;
         submitBtn.textContent = 'Iniciando sesión...';
 
-        // Obtener datos del servidor global
-        const globalData = await getGlobalData();
+        // Buscar usuario en Supabase
+        const userData = await getUserByUsername(username);
         
-        if (!globalData.users[username]) {
+        if (!userData) {
           showAuthError('Usuario no encontrado');
           submitBtn.disabled = false;
           submitBtn.textContent = 'Iniciar Sesión';
           return;
         }
 
-        const userData = globalData.users[username];
         const hashedPassword = await hashPassword(password);
         
         if (userData.password !== hashedPassword) {
@@ -622,45 +746,80 @@
       }
     }
 
-    // Cargar datos del usuario
-    async function loadUserData() {
+    // Eliminar cuenta
+    async function deleteAccount() {
       if (!currentUser) return;
 
       try {
-        const globalData = await getGlobalData();
-        if (globalData.users[currentUser]) {
-          updatePlayerStats(globalData.users[currentUser]);
-        }
+        await deleteUser(currentUser);
+        
+        localStorage.removeItem('vitrasaSession');
+        currentUser = null;
+        
+        hideDeleteModal();
+        
+        const nameInputSection = document.getElementById('name-input-section');
+        const logoutBtn = document.getElementById('logout-btn');
+        const deleteBtn = document.getElementById('delete-account-btn');
+        
+        if (nameInputSection) nameInputSection.classList.remove('hidden');
+        if (logoutBtn) logoutBtn.classList.add('hidden');
+        if (deleteBtn) deleteBtn.classList.add('hidden');
+        
+        updatePlayerStats();
+        updateLeaderboard();
+        showToast('Cuenta eliminada correctamente');
       } catch (error) {
-        console.error('Error al cargar datos:', error);
+        console.error('Error al eliminar cuenta:', error);
+        showToast('Error al eliminar la cuenta');
       }
     }
 
-    // Guardar puntuación
-    async function saveScore(playerData) {
-      if (!currentUser) {
-        showToast('Crea una cuenta para guardar tu progreso');
-        return;
-      }
+    // ==================== GESTIÓN DE PUNTUACIONES GLOBALES ====================
+    async function updateLeaderboard() {
+      const container = document.getElementById('leaderboard');
+      if (!container) return;
 
       try {
-        // Obtener datos globales
-        const globalData = await getGlobalData();
+        container.innerHTML = '<p class="text-gray-400 text-center py-4">Cargando ranking global...</p>';
         
-        if (globalData.users[currentUser]) {
-          globalData.users[currentUser].totalScore += playerData.score;
-          globalData.users[currentUser].gamesPlayed += 1;
-          globalData.users[currentUser].bestStreak = Math.max(globalData.users[currentUser].bestStreak, playerData.bestStreak);
-          globalData.users[currentUser].lastPlayed = Date.now();
-          
-          // Guardar en el servidor
-          await setGlobalData(globalData);
-          loadUserData();
-          updateLeaderboard();
+        const users = await getAllUsers();
+        
+        if (!users || users.length === 0) {
+          container.innerHTML = '<p class="text-gray-400 text-center py-4">Aún no hay puntuaciones. ¡Sé el primero!</p>';
+          return;
         }
+
+        const leaderboard = users
+          .map(user => ({
+            name: user.username,
+            totalScore: user.total_score || 0,
+            gamesPlayed: user.games_played || 0,
+            bestStreak: user.best_streak || 0
+          }))
+          .sort((a, b) => b.totalScore - a.totalScore)
+          .slice(0, 10);
+        
+        container.innerHTML = leaderboard.map((player, index) => {
+          const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+          const isCurrentPlayer = player.name === currentUser;
+          
+          return `
+            <div class="leaderboard-row flex items-center justify-between p-3 rounded-xl ${isCurrentPlayer ? 'bg-yellow-500/20 border border-yellow-500/50' : 'bg-white/5'}" style="animation-delay: ${index * 0.05}s">
+              <div class="flex items-center gap-3">
+                <span class="text-xl w-8">${medal}</span>
+                <span class="font-semibold ${isCurrentPlayer ? 'text-yellow-400' : ''}">${player.name}</span>
+              </div>
+              <div class="text-right">
+                <span class="font-bold text-yellow-400">${player.totalScore}</span>
+                <span class="text-xs text-gray-400 ml-1">pts</span>
+              </div>
+            </div>
+          `;
+        }).join('');
       } catch (error) {
-        console.error('Error al guardar puntuación:', error);
-        showToast('Error al guardar los datos');
+        console.error('Error al cargar leaderboard:', error);
+        container.innerHTML = '<p class="text-gray-400 text-center py-4">Error al cargar el ranking.</p>';
       }
     }
 
@@ -686,7 +845,7 @@
           destinations: ['CUVI (Campus Universitario)', 'Berbés', 'Bouzas', 'Torrecedeira'],
           image: 'https://lucasmaneirodelatm-dot.github.io/cortex/img/15C.png' },
         { number: 'U1', name: 'Praza de España - Fragoso - Universidade', color: '#795548', 
-          destinations: ['CUVI (Campus Universitario)', 'Hospital Álvaro Cunqueiro', 'Praza de España', 'Praza de América', 'Castrelos'],
+          destinations: ['CUVI (Campus Universitario)', 'Hospital ��lvaro Cunqueiro', 'Praza de España', 'Praza de América', 'Castrelos'],
           image: 'https://lucasmaneirodelatm-dot.github.io/cortex/img/U1.png' }
       ],
       busImages: [
@@ -765,7 +924,7 @@
         }
         
         container.innerHTML = leaderboard.map((player, index) => {
-          const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+          const medal = index === 0 ? '����' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
           const isCurrentPlayer = player.name === currentUser;
           
           return `
@@ -1743,5 +1902,5 @@
       }
     });
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c7b6a8f62d6d929',t:'MTc3MDA1MzQyNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c7b734270b6d929',t:'MTc3MDA1Mzc4MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
